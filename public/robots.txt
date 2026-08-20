@@ -1,0 +1,47 @@
+# Tutorials and Code Search & AI Crawler Directives
+# https://tutorialsandcode.dev/robots.txt
+
+User-agent: *
+Allow: /
+Allow: /blog/
+Allow: /category/
+Allow: /author/
+Allow: /latest
+Allow: /about
+Allow: /contact
+Allow: /legal
+Allow: /assets/
+Disallow: /admin
+Disallow: /admin/
+Disallow: /admin/*
+Disallow: /api/
+
+# Explicit AI Search & Knowledge Engine Indexing Permissions
+User-agent: GPTBot
+Allow: /
+Disallow: /admin/
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin/
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /admin/
+
+User-agent: CCBot
+Allow: /
+Disallow: /admin/
+
+# Dynamic & Static Sitemap Locations
+Sitemap: https://tutorialsandcode.dev/sitemap.xml

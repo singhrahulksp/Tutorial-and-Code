@@ -1,0 +1,64 @@
+{
+  "entities": {
+    "Post": {
+      "collection": "posts",
+      "fields": {
+        "title": { "type": "string", "required": true },
+        "slug": { "type": "string", "required": true },
+        "description": { "type": "string", "required": true },
+        "content": { "type": "string", "required": true },
+        "category": { "type": "string", "required": true },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "authorId": { "type": "string", "required": true },
+        "featuredImage": { "type": "string", "required": true },
+        "readingTime": { "type": "number", "required": true },
+        "publishedAt": { "type": "string", "required": true },
+        "updatedAt": { "type": "string" },
+        "status": { "type": "string", "required": true },
+        "featured": { "type": "boolean" },
+        "views": { "type": "number" },
+        "seoTitle": { "type": "string" },
+        "seoDescription": { "type": "string" }
+      }
+    },
+    "Category": {
+      "collection": "categories",
+      "fields": {
+        "name": { "type": "string", "required": true },
+        "slug": { "type": "string", "required": true },
+        "description": { "type": "string", "required": true },
+        "color": { "type": "string" },
+        "iconName": { "type": "string" }
+      }
+    },
+    "Author": {
+      "collection": "authors",
+      "fields": {
+        "name": { "type": "string", "required": true },
+        "slug": { "type": "string", "required": true },
+        "role": { "type": "string", "required": true },
+        "bio": { "type": "string", "required": true },
+        "avatar": { "type": "string", "required": true },
+        "twitter": { "type": "string" },
+        "github": { "type": "string" },
+        "website": { "type": "string" }
+      }
+    },
+    "Subscriber": {
+      "collection": "subscribers",
+      "fields": {
+        "email": { "type": "string", "required": true },
+        "subscribedAt": { "type": "string", "required": true }
+      }
+    },
+    "SiteSettings": {
+      "collection": "siteSettings",
+      "fields": {
+        "siteName": { "type": "string", "required": true },
+        "tagline": { "type": "string", "required": true },
+        "description": { "type": "string", "required": true },
+        "siteUrl": { "type": "string", "required": true }
+      }
+    }
+  }
+}

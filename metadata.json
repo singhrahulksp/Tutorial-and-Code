@@ -1,0 +1,6 @@
+{
+  "name": "Tutorials and Code",
+  "description": "A modern, minimal, and high-performance engineering publication providing in-depth tutorials, code architectures, AI systems, and developer insights.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
