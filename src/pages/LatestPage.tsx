@@ -33,8 +33,9 @@ export const LatestPage: React.FC = () => {
   }, [publishedPosts, selectedCategory, sortBy]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="w-full max-w-[96rem] mx-auto px-3 sm:px-6 lg:px-8 py-8">
       <SEOHead
+        pagePath="/latest"
         title="Latest Tech Articles, Tutorials & Systems Research"
         description="Explore all recent engineering breakdowns, programming tutorials, architectural insights, and code guides on Tutorials and Code."
         canonicalUrl="https://tutorialsandcode.dev/latest"
@@ -125,20 +126,23 @@ export const LatestPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Articles Feed */}
-      {viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredAndSortedPosts.map((post) => (
-            <ArticleCard key={post.id} post={post} variant="grid" />
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-4 max-w-4xl mx-auto">
-          {filteredAndSortedPosts.map((post) => (
-            <ArticleCard key={post.id} post={post} variant="horizontal" />
-          ))}
-        </div>
-      )}
+      {/* Articles Feed Section */}
+      <section aria-label="Chronological Dispatches">
+        <h2 className="sr-only">Dispatches Feed</h2>
+        {viewMode === 'grid' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredAndSortedPosts.map((post) => (
+              <ArticleCard key={post.id} post={post} variant="grid" />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4 max-w-5xl mx-auto">
+            {filteredAndSortedPosts.map((post) => (
+              <ArticleCard key={post.id} post={post} variant="horizontal" />
+            ))}
+          </div>
+        )}
+      </section>
 
       {filteredAndSortedPosts.length === 0 && (
         <div className="py-20 text-center text-zinc-500">

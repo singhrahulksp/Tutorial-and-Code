@@ -40,8 +40,9 @@ export const SearchPage: React.FC = () => {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="w-full max-w-[96rem] mx-auto px-3 sm:px-6 lg:px-8 py-8">
       <SEOHead
+        pagePath="/search"
         title={normalizedQuery ? `Search: "${searchQuery}" | Tutorials and Code` : 'Search Technical Publications & Guides | Tutorials and Code'}
         description="Search through engineering breakdowns, coding tutorials, AI architecture studies, and cybersecurity reviews."
         canonicalUrl="https://tutorialsandcode.dev/search"
@@ -142,34 +143,37 @@ export const SearchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Results Grid */}
-      {searchResults.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {searchResults.map((post) => (
-            <ArticleCard key={post.id} post={post} variant="grid" />
-          ))}
-        </div>
-      ) : (
-        <div className="py-20 text-center bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-100 dark:border-zinc-800">
-          <BookOpen className="w-10 h-10 text-zinc-400 mx-auto mb-3" />
-          <h3 className="text-lg font-black uppercase tracking-tight text-neutral-900 dark:text-white">
-            No matching articles found
-          </h3>
-          <p className="text-xs text-zinc-500 mt-1 max-w-sm mx-auto">
-            We couldn't find any articles matching your search query. Try checking your spelling or using broader search terms.
-          </p>
-          <button
-            onClick={() => {
-              setSearchQuery('');
-              setSelectedCategory('all');
-              navigate('/search');
-            }}
-            className="mt-5 px-4 py-2 text-xs font-bold uppercase tracking-wider bg-black text-white dark:bg-white dark:text-black"
-          >
-            Clear Search Filter
-          </button>
-        </div>
-      )}
+      {/* Results Grid Section */}
+      <section aria-label="Search Results Feed">
+        <h2 className="sr-only">Matching Publications</h2>
+        {searchResults.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {searchResults.map((post) => (
+              <ArticleCard key={post.id} post={post} variant="grid" />
+            ))}
+          </div>
+        ) : (
+          <div className="py-20 text-center bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-100 dark:border-zinc-800">
+            <BookOpen className="w-10 h-10 text-zinc-400 mx-auto mb-3" />
+            <h2 className="text-lg font-black uppercase tracking-tight text-neutral-900 dark:text-white">
+              No matching articles found
+            </h2>
+            <p className="text-xs text-zinc-500 mt-1 max-w-sm mx-auto">
+              We couldn't find any articles matching your search query. Try checking your spelling or using broader search terms.
+            </p>
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedCategory('all');
+                navigate('/search');
+              }}
+              className="mt-5 px-4 py-2 text-xs font-bold uppercase tracking-wider bg-black text-white dark:bg-white dark:text-black"
+            >
+              Clear Search Filter
+            </button>
+          </div>
+        )}
+      </section>
     </div>
   );
 };

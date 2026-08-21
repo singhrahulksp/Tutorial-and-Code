@@ -56,8 +56,9 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({ slug }) => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="w-full max-w-[96rem] mx-auto px-3 sm:px-6 lg:px-8 py-8">
       <SEOHead
+        pagePath={`/category/${slug}`}
         title={`${category.name} — Technical Guides & Architecture Breakdowns`}
         description={category.description}
         canonicalUrl={canonicalUrl}
@@ -96,15 +97,15 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({ slug }) => {
         {/* Subtopic Navigation Chips for Topical Authority */}
         {category.subtopics && category.subtopics.length > 0 && (
           <div className="mt-6 pt-6 border-t border-zinc-200 dark:border-zinc-800">
-            <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2.5">
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2.5">
               Core Subtopics & Focus Areas
-            </div>
+            </h3>
             <div className="flex flex-wrap gap-2">
               {category.subtopics.map((subtopic) => (
                 <button
                   key={subtopic}
                   onClick={() => navigate(`/search?q=${encodeURIComponent(subtopic)}`)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 hover:border-blue-500 transition-colors"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold bg-white dark:bg-zinc-850 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 hover:border-blue-500 transition-colors"
                 >
                   <Hash className="w-3 h-3 text-blue-500" />
                   {subtopic}

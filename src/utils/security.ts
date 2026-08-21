@@ -3,7 +3,8 @@
  */
 
 const SALT_PREFIX = 'techpulse_cms_auth_v2:';
-const MASTER_PASSWORD_DEFAULT = 'Shopunder@2444';
+// Precomputed cryptographic SHA-256 salted hash for default authentication (never plaintext)
+const DEFAULT_SALTED_PASSWORD_HASH = 'f913fa9c5674bfa757c07f143c120e380733c3315ca454e13883d75fd21b7106';
 const SESSION_STORAGE_KEY = 'techpulse_admin_session_v2';
 const RATE_LIMIT_STORAGE_KEY = 'techpulse_login_rate_limit_v2';
 
@@ -207,8 +208,8 @@ export function resetFailedLoginAttempts(): void {
 }
 
 /**
- * Validates the admin password securely.
- * Checks against the target master password "Shopunder@2444" or custom configured hash.
+ * Validates the admin password securely using constant-time salted hash comparison.
+ * Plaintext passwords are never stored or evaluated directly.
  */
 export async function verifyAdminPassword(
   inputPassword: string,
@@ -227,9 +228,9 @@ export async function verifyAdminPassword(
   }
 
   const inputHash = await computeHash(inputPassword);
-  const targetHash = customPasswordHash || (await computeHash(MASTER_PASSWORD_DEFAULT));
+  const targetHash = customPasswordHash || DEFAULT_SALTED_PASSWORD_HASH;
 
-  const isMasterMatch = constantTimeEquals(inputHash, targetHash) || inputPassword === MASTER_PASSWORD_DEFAULT;
+  const isMasterMatch = constantTimeEquals(inputHash, targetHash);
 
   if (isMasterMatch) {
     resetFailedLoginAttempts();

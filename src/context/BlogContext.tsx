@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
-import { Post, Category, Author, NewsletterSubscriber, SiteSettings } from '../types';
+import { Post, Category, Author, NewsletterSubscriber, SiteSettings, PageMetaConfig } from '../types';
 import { INITIAL_POSTS } from '../data/initialPosts';
 import { INITIAL_CATEGORIES } from '../data/categories';
 import { INITIAL_AUTHORS } from '../data/authors';
@@ -28,6 +28,81 @@ const STORAGE_KEY_SUBSCRIBERS = 'tutorialsandcode_subscribers_v1';
 const STORAGE_KEY_SETTINGS = 'tutorialsandcode_settings_v1';
 const STORAGE_KEY_AUTH = 'tutorialsandcode_admin_auth_v1';
 
+export const DEFAULT_PAGE_META_OVERRIDES: Record<string, PageMetaConfig> = {
+  '/': {
+    path: '/',
+    pageName: 'Landing / Home Page',
+    title: 'Tutorials and Code — Engineering Tutorials, Clean Architectures & Code Deep Dives',
+    description: 'In-depth programming tutorials, clean code architectures, AI systems, and software engineering analysis for builders.',
+    canonicalUrl: 'https://tutorialsandcode.dev',
+    keywords: 'software engineering, tutorials, clean code, AI architecture, rust, web performance, zero-trust',
+    robots: 'index, follow',
+    ogImage: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=1400&q=80',
+  },
+  '/latest': {
+    path: '/latest',
+    pageName: 'Latest Dispatches',
+    title: 'Latest Engineering Dispatches & Technical Guides | Tutorials and Code',
+    description: 'Chronological archive of all published engineering tutorials, system breakdowns, and research articles.',
+    canonicalUrl: 'https://tutorialsandcode.dev/latest',
+    keywords: 'latest tutorials, coding guides, technical feed, systems architecture',
+    robots: 'index, follow',
+    ogImage: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1400&q=80',
+  },
+  '/search': {
+    path: '/search',
+    pageName: 'Search Archive',
+    title: 'Search Technical Publications & Guides | Tutorials and Code',
+    description: 'Search through engineering breakdowns, coding tutorials, AI architecture studies, and cybersecurity reviews.',
+    canonicalUrl: 'https://tutorialsandcode.dev/search',
+    keywords: 'search coding tutorials, engineering search, code index',
+    robots: 'noindex, follow',
+  },
+  '/about': {
+    path: '/about',
+    pageName: 'About & Editorial Masthead',
+    title: 'About Tutorials and Code — Editorial Standards & Technical Mission',
+    description: 'Tutorials and Code is an independent publication dedicated to software architecture, AI systems, clean coding tutorials, and engineering craft.',
+    canonicalUrl: 'https://tutorialsandcode.dev/about',
+    keywords: 'about tutorials and code, editorial standards, engineering masthead',
+    robots: 'index, follow',
+    ogImage: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1400&q=80',
+  },
+  '/contact': {
+    path: '/contact',
+    pageName: 'Contact Newsroom',
+    title: 'Contact Editorial Staff & Newsroom — Tutorials and Code',
+    description: 'Submit code tutorials, report technical corrections, pitch guest articles, or contact the Tutorials and Code staff.',
+    canonicalUrl: 'https://tutorialsandcode.dev/contact',
+    keywords: 'contact editorial, pitch tutorial, report bug, code errata',
+    robots: 'index, follow',
+  },
+  '/privacy': {
+    path: '/privacy',
+    pageName: 'Privacy Policy',
+    title: 'Privacy Policy & Zero-Tracking Manifesto — Tutorials and Code',
+    description: 'Our zero-tracking and privacy commitment to technical readers.',
+    canonicalUrl: 'https://tutorialsandcode.dev/privacy',
+    robots: 'index, follow',
+  },
+  '/terms': {
+    path: '/terms',
+    pageName: 'Terms of Service',
+    title: 'Terms of Service & Code Licensing — Tutorials and Code',
+    description: 'Terms of service, open-source code licensing, and publication rights.',
+    canonicalUrl: 'https://tutorialsandcode.dev/terms',
+    robots: 'index, follow',
+  },
+  '/sitemap': {
+    path: '/sitemap',
+    pageName: 'Sitemap & Index',
+    title: 'Dynamic XML Sitemap & Editorial Index | Tutorials and Code',
+    description: 'Search engine and crawler XML index of all published articles, category tracks, and author profiles crawled dynamically from Firestore.',
+    canonicalUrl: 'https://tutorialsandcode.dev/sitemap.xml',
+    robots: 'index, follow',
+  },
+};
+
 const DEFAULT_SETTINGS: SiteSettings = {
   siteName: 'Tutorials and Code',
   tagline: 'Engineering Tutorials, Clean Architectures & Code Deep Dives',
@@ -38,6 +113,7 @@ const DEFAULT_SETTINGS: SiteSettings = {
   enableTrending: true,
   twitterHandle: '@tutorialsandcode',
   githubUrl: 'https://github.com',
+  pageMetaOverrides: DEFAULT_PAGE_META_OVERRIDES,
 };
 
 interface BlogContextType {
@@ -234,7 +310,11 @@ export function BlogProvider({ children }: { children: React.ReactNode }) {
             }
           },
           (err) => {
-            console.warn('Firestore posts sync notice:', err);
+            if (err?.code === 'unavailable' || err?.message?.includes('offline')) {
+              setIsFirebaseConnected(false);
+            } else {
+              console.warn('Firestore posts sync notice:', err);
+            }
           }
         );
 
@@ -259,7 +339,11 @@ export function BlogProvider({ children }: { children: React.ReactNode }) {
             }
           },
           (err) => {
-            console.warn('Firestore categories sync notice:', err);
+            if (err?.code === 'unavailable' || err?.message?.includes('offline')) {
+              setIsFirebaseConnected(false);
+            } else {
+              console.warn('Firestore categories sync notice:', err);
+            }
           }
         );
 
@@ -284,7 +368,11 @@ export function BlogProvider({ children }: { children: React.ReactNode }) {
             }
           },
           (err) => {
-            console.warn('Firestore authors sync notice:', err);
+            if (err?.code === 'unavailable' || err?.message?.includes('offline')) {
+              setIsFirebaseConnected(false);
+            } else {
+              console.warn('Firestore authors sync notice:', err);
+            }
           }
         );
 
@@ -302,7 +390,11 @@ export function BlogProvider({ children }: { children: React.ReactNode }) {
             }
           },
           (err) => {
-            console.warn('Firestore subscribers sync notice:', err);
+            if (err?.code === 'unavailable' || err?.message?.includes('offline')) {
+              setIsFirebaseConnected(false);
+            } else {
+              console.warn('Firestore subscribers sync notice:', err);
+            }
           }
         );
 
@@ -312,13 +404,25 @@ export function BlogProvider({ children }: { children: React.ReactNode }) {
           settingsDocRef,
           async (docSnap) => {
             if (docSnap.exists()) {
-              setSiteSettings({ ...DEFAULT_SETTINGS, ...(docSnap.data() as SiteSettings) });
+              const remoteData = docSnap.data() as SiteSettings;
+              setSiteSettings({
+                ...DEFAULT_SETTINGS,
+                ...remoteData,
+                pageMetaOverrides: {
+                  ...DEFAULT_PAGE_META_OVERRIDES,
+                  ...(remoteData.pageMetaOverrides || {}),
+                },
+              });
             } else {
               await setDoc(settingsDocRef, DEFAULT_SETTINGS);
             }
           },
           (err) => {
-            console.warn('Firestore settings sync notice:', err);
+            if (err?.code === 'unavailable' || err?.message?.includes('offline')) {
+              setIsFirebaseConnected(false);
+            } else {
+              console.warn('Firestore settings sync notice:', err);
+            }
           }
         );
 

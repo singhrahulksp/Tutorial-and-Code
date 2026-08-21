@@ -10,8 +10,9 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type }) => {
   const isPrivacy = type === 'privacy';
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="w-full max-w-[96rem] mx-auto px-3 sm:px-6 lg:px-8 py-8">
       <SEOHead
+        pagePath={`/${type}`}
         title={isPrivacy ? 'Privacy Policy — Tutorials and Code' : 'Terms of Service — Tutorials and Code'}
         description={
           isPrivacy
@@ -26,7 +27,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type }) => {
           {isPrivacy ? <Shield className="w-4 h-4 text-emerald-500" /> : <FileText className="w-4 h-4 text-blue-500" />}
           <span>Legal & Compliance</span>
         </div>
-        <h1 className="text-3xl font-extrabold text-neutral-900 dark:text-white tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-neutral-900 dark:text-white tracking-tight">
           {isPrivacy ? 'Privacy Policy & Zero-Tracking Manifesto' : 'Terms of Service & Code Licensing'}
         </h1>
         <p className="text-xs text-neutral-500 font-mono mt-2">
@@ -34,7 +35,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type }) => {
         </p>
       </div>
 
-      <div className="prose dark:prose-invert max-w-none text-sm text-neutral-700 dark:text-neutral-300 space-y-6 leading-relaxed">
+      <div className="prose dark:prose-invert max-w-4xl text-sm text-neutral-700 dark:text-neutral-300 space-y-6 leading-relaxed">
         {isPrivacy ? (
           <>
             <section className="space-y-3">

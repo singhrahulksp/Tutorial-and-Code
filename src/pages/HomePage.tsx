@@ -42,9 +42,10 @@ export const HomePage: React.FC = () => {
   const websiteSchema = generateWebSiteSchema(siteSettings);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="w-full max-w-[96rem] mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8">
       <SEOHead
-        title="Tutorials and Code — Engineering Guides, Architecture & Deep Tech"
+        pagePath="/"
+        title="Tutorials and Code — Engineering Tutorials, Clean Architectures & Code Deep Dives"
         description={siteSettings.description}
         canonicalUrl={canonicalUrl}
         structuredData={[orgSchema, websiteSchema]}
@@ -63,7 +64,7 @@ export const HomePage: React.FC = () => {
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-sm font-black uppercase tracking-[0.3em] text-zinc-400">
-                Latest Insights
+                Latest Insights & Deep Dives
               </h2>
               <button
                 onClick={() => navigate('/latest')}
@@ -85,7 +86,7 @@ export const HomePage: React.FC = () => {
         <div className="lg:col-span-4 bg-zinc-50 dark:bg-zinc-900/40 p-6 sm:p-8 flex flex-col justify-between">
           <div>
             <h2 className="text-sm font-black uppercase tracking-[0.3em] text-zinc-400 mb-6">
-              Trending
+              Trending Engineering Tracks
             </h2>
             <div className="flex flex-col gap-6">
               {publishedPosts.slice(0, 3).map((post, idx) => {
@@ -101,12 +102,15 @@ export const HomePage: React.FC = () => {
                       {num}
                     </span>
                     <div>
-                      <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block mb-0.5">
+                      <h4 className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block mb-0.5">
                         {cat?.name || post.category}
-                      </span>
-                      <p className="text-[13px] font-bold leading-tight text-neutral-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+                      </h4>
+                      <h3 className="text-[13px] font-bold leading-tight text-neutral-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
                         {post.title}
-                      </p>
+                      </h3>
+                      <h5 className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider mt-1">
+                        Rank #{idx + 1} Trending
+                      </h5>
                     </div>
                   </div>
                 );

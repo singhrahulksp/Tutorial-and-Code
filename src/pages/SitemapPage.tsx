@@ -8,8 +8,9 @@ export const SitemapPage: React.FC = () => {
   const isXmlRoute = currentPath === '/sitemap.xml';
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="w-full max-w-[96rem] mx-auto px-3 sm:px-6 lg:px-8 py-8">
       <SEOHead
+        pagePath="/sitemap.xml"
         title="Dynamic XML Sitemap & Index | Tutorials and Code"
         description="Search engine and crawler XML index of all published articles, category tracks, and author profiles crawled dynamically from Firestore."
         canonicalUrl="https://tutorialsandcode.dev/sitemap.xml"

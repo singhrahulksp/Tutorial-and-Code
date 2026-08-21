@@ -48,8 +48,9 @@ export const AuthorPage: React.FC<AuthorPageProps> = ({ slug }) => {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" itemScope itemType="https://schema.org/ProfilePage">
+    <div className="w-full max-w-[96rem] mx-auto px-3 sm:px-6 lg:px-8 py-8" itemScope itemType="https://schema.org/ProfilePage">
       <SEOHead
+        pagePath={`/author/${author.slug}`}
         title={`${author.name} — Technical Author & Systems Researcher`}
         description={author.bio}
         canonicalUrl={canonicalUrl}

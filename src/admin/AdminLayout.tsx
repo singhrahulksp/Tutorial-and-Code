@@ -13,6 +13,7 @@ import {
   LogOut,
   ExternalLink,
   Cloud,
+  Globe,
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -40,6 +41,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
     { name: 'All Articles', path: '/admin/posts', icon: FileText, badge: posts.length },
     { name: 'New Article', path: '/admin/posts/new', icon: PlusCircle },
+    { name: 'Page SEO & Metas', path: '/admin/seo', icon: Globe },
     { name: 'Categories', path: '/admin/categories', icon: FolderTree },
     { name: 'Authors', path: '/admin/authors', icon: Users },
     { name: 'Settings & Cloud', path: '/admin/settings', icon: Settings },

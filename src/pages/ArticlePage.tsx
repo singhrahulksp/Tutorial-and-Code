@@ -138,7 +138,7 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({ slug }) => {
       />
 
       {/* Top Header & Breadcrumb Container */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
+      <div className="w-full max-w-[96rem] mx-auto px-3 sm:px-6 lg:px-8 pt-8 pb-4">
         {/* Semantic Breadcrumb Navigation */}
         <nav
           aria-label="Breadcrumb"
@@ -188,7 +188,7 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({ slug }) => {
         {/* Main H1 Title - Single Primary Heading */}
         <h1
           itemProp="headline"
-          className="text-3xl sm:text-4xl md:text-5xl font-black text-neutral-950 dark:text-white tracking-tighter leading-[1.05]"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-neutral-950 dark:text-white tracking-tighter leading-[1.05]"
         >
           {post.title}
         </h1>
@@ -196,7 +196,7 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({ slug }) => {
         {/* Lead Excerpt */}
         <p
           itemProp="description"
-          className="text-base sm:text-lg text-zinc-600 dark:text-zinc-300 mt-4 leading-relaxed font-normal"
+          className="text-base sm:text-lg text-zinc-600 dark:text-zinc-300 mt-4 leading-relaxed font-normal max-w-4xl"
         >
           {post.description}
         </p>
@@ -209,7 +209,7 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({ slug }) => {
                 onClick={() => navigate(`/author/${author.slug}`)}
                 className="flex items-center gap-2 group text-left"
               >
-                <div className="w-9 h-9 overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+                <div className="w-9 h-9 overflow-hidden bg-zinc-100 dark:bg-zinc-850">
                   <img
                     src={author.avatar}
                     alt={`${author.name} portrait`}
@@ -268,8 +268,8 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({ slug }) => {
       </div>
 
       {/* Featured Cover Image with Descriptive Alt Tag */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 my-8">
-        <div className="w-full aspect-[21/9] sm:aspect-[16/8] bg-zinc-100 dark:bg-zinc-900 overflow-hidden relative border border-zinc-100 dark:border-zinc-800">
+      <div className="w-full max-w-[96rem] mx-auto px-3 sm:px-6 lg:px-8 my-8">
+        <div className="w-full aspect-[21/9] sm:aspect-[21/8] bg-zinc-100 dark:bg-zinc-900 overflow-hidden relative border border-zinc-100 dark:border-zinc-800">
           <img
             src={post.featuredImage}
             alt={post.title}
@@ -281,13 +281,13 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({ slug }) => {
       </div>
 
       {/* Article Content & Table of Contents Grid */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+      <div className="w-full max-w-[96rem] mx-auto px-3 sm:px-6 lg:px-8 pb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-14">
           
           {/* Main Article Body */}
-          <div className="lg:col-span-8 space-y-8">
+          <div className="lg:col-span-8 xl:col-span-8 space-y-8 min-w-0">
 
-            {/* Answer-First Executive Summary / Direct Answer (AI Citability & Factual Discovery) */}
+            {/* Answer-First Executive Summary / Direct Answer */}
             {post.directAnswer && (
               <section
                 aria-label="Direct Answer Summary"
@@ -305,7 +305,7 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({ slug }) => {
               </section>
             )}
 
-            {/* Key Takeaways Box (Self-Contained Factual Extraction) */}
+            {/* Key Takeaways Box */}
             {post.keyTakeaways && post.keyTakeaways.length > 0 && (
               <section
                 aria-label="Key Takeaways"
@@ -333,7 +333,7 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({ slug }) => {
               <MarkdownRenderer content={post.content} />
             </div>
 
-            {/* FAQ Accordion Section (Visible & Structured for Search) */}
+            {/* FAQ Accordion Section */}
             {post.faq && post.faq.length > 0 && (
               <section id="faq" className="pt-8 border-t border-zinc-100 dark:border-zinc-800">
                 <div className="flex items-center gap-2 mb-4">
@@ -355,7 +355,7 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({ slug }) => {
                           onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
                           className="w-full p-4 text-left flex items-center justify-between gap-4 font-bold text-xs sm:text-sm text-neutral-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                         >
-                          <span>{faqItem.question}</span>
+                          <h3 className="font-bold text-xs sm:text-sm">{faqItem.question}</h3>
                           <ChevronRight
                             className={`w-4 h-4 text-zinc-400 shrink-0 transition-transform ${
                               isOpen ? 'rotate-90 text-blue-600' : ''
@@ -374,7 +374,7 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({ slug }) => {
               </section>
             )}
 
-            {/* Sources & Citations Section (Transparency & Attributability) */}
+            {/* Sources & Citations Section */}
             {post.sources && post.sources.length > 0 && (
               <section id="sources" className="pt-8 border-t border-zinc-100 dark:border-zinc-800">
                 <div className="flex items-center gap-2 mb-4">
@@ -390,9 +390,9 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({ slug }) => {
                       className="p-3 bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-200 dark:border-zinc-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
                     >
                       <div className="min-w-0">
-                        <div className="font-bold text-neutral-900 dark:text-white truncate">
+                        <h3 className="font-bold text-neutral-900 dark:text-white truncate text-xs">
                           {source.title}
-                        </div>
+                        </h3>
                         <div className="text-[10px] text-zinc-500 font-medium flex items-center gap-2 mt-0.5">
                           <span>{source.name}</span>
                           {source.date && (
@@ -420,9 +420,9 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({ slug }) => {
             {/* Index Tags */}
             {post.tags && post.tags.length > 0 && (
               <div className="pt-8 border-t border-zinc-100 dark:border-zinc-800">
-                <div className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-3">
+                <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-3">
                   Index Tags
-                </div>
+                </h4>
                 <div className="flex flex-wrap gap-2">
                   {post.tags.map((tag) => (
                     <button
@@ -489,7 +489,7 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({ slug }) => {
           </div>
 
           {/* Right Sticky Sidebar (TOC & Fast Navigation) */}
-          <aside className="hidden lg:block lg:col-span-4">
+          <aside className="hidden lg:block lg:col-span-4 xl:col-span-4">
             <div className="sticky top-24 space-y-8">
               <div className="p-6 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-100 dark:border-zinc-800">
                 <TableOfContents content={post.content} />
@@ -504,11 +504,11 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({ slug }) => {
       {/* Semantic Related Publications Grid */}
       {relatedPosts.length > 0 && (
         <section className="border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-[#0a0a0a] py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="w-full max-w-[96rem] mx-auto px-3 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8">
-              <h3 className="text-sm font-black uppercase tracking-[0.3em] text-zinc-400">
+              <h2 className="text-sm font-black uppercase tracking-[0.3em] text-zinc-400">
                 Related Research & Publications
-              </h3>
+              </h2>
               <button
                 onClick={() => navigate(`/category/${post.category}`)}
                 className="text-[11px] font-bold uppercase border-b border-black dark:border-white pb-0.5 hover:text-blue-600 transition-colors"

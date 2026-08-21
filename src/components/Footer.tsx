@@ -10,7 +10,7 @@ export const Footer: React.FC = () => {
 
   return (
     <footer className="border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-[#0a0a0a] transition-colors mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="w-full max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-12">
           
           {/* Brand Col */}

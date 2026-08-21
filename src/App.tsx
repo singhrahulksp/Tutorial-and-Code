@@ -154,7 +154,7 @@ const AppRoutes: React.FC = () => {
     }
 
     // 18. Admin Settings
-    if (currentPath === '/admin/settings') {
+    if (currentPath === '/admin/settings' || currentPath === '/admin/seo') {
       return requireAdmin(<AdminSettingsPage />);
     }
 

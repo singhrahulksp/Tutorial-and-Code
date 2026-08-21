@@ -67,6 +67,18 @@ export interface NewsletterSubscriber {
   subscribedAt: string;
 }
 
+export interface PageMetaConfig {
+  path: string; // e.g. '/', '/latest', '/about', '/contact', '/privacy', '/terms', '/search', '/sitemap'
+  pageName: string;
+  title?: string;
+  description?: string;
+  canonicalUrl?: string;
+  ogImage?: string;
+  keywords?: string;
+  robots?: string; // 'index, follow' | 'noindex, follow' | 'noindex, nofollow'
+  updatedAt?: string;
+}
+
 export interface SiteSettings {
   siteName: string;
   tagline: string;
@@ -78,4 +90,6 @@ export interface SiteSettings {
   twitterHandle: string;
   githubUrl: string;
   customAdminPasswordHash?: string;
+  pageMetaOverrides?: Record<string, PageMetaConfig>;
 }
+

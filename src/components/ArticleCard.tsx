@@ -36,15 +36,15 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ post, variant = 'grid'
           />
         </div>
         <div className="flex-1 min-w-0">
-          <span className="text-[9px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest block mb-0.5">
+          <h4 className="text-[9px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest block mb-0.5">
             {category?.name || post.category}
-          </span>
-          <h4 className="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
-            {post.title}
           </h4>
-          <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider mt-1">
+          <h3 className="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
+            {post.title}
+          </h3>
+          <h5 className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider mt-1">
             {post.readingTime} min • {formattedDate}
-          </div>
+          </h5>
         </div>
       </article>
     );
@@ -66,9 +66,9 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ post, variant = 'grid'
         </div>
 
         <div className="flex-1 min-w-0 space-y-2">
-          <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest block">
+          <h4 className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest block">
             {category?.name || post.category}
-          </span>
+          </h4>
           <h3 className="text-lg sm:text-xl font-bold leading-snug tracking-tight text-neutral-950 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
             {post.title}
           </h3>
@@ -76,13 +76,13 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ post, variant = 'grid'
             {post.description}
           </p>
 
-          <div className="pt-2 flex items-center gap-3 text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
+          <h5 className="pt-2 flex items-center gap-3 text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
             <span>{author?.name || 'Staff'}</span>
             <span>•</span>
             <span>{post.readingTime} min read</span>
             <span>•</span>
             <span>{formattedDate}</span>
-          </div>
+          </h5>
         </div>
       </article>
     );
@@ -104,23 +104,23 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ post, variant = 'grid'
       </div>
 
       <div className="space-y-1.5 flex-1 flex flex-col">
-        <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest block">
+        <h4 className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest block">
           {category?.name || post.category}
-        </span>
-
-        <h4 className="font-bold text-base sm:text-lg leading-tight tracking-tight text-neutral-950 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
-          {post.title}
         </h4>
+
+        <h3 className="font-bold text-base sm:text-lg leading-tight tracking-tight text-neutral-950 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+          {post.title}
+        </h3>
 
         <p className="text-[13px] text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
           {post.description}
         </p>
 
-        <div className="mt-auto pt-2 flex items-center gap-2 text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
+        <h5 className="mt-auto pt-2 flex items-center gap-2 text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
           <span>{author?.name || 'Staff'}</span>
           <span>•</span>
           <span>{post.readingTime} min</span>
-        </div>
+        </h5>
       </div>
     </article>
   );

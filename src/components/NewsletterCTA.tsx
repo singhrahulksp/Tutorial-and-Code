@@ -30,9 +30,9 @@ export const NewsletterCTA: React.FC<NewsletterCTAProps> = ({ variant = 'card' }
   if (variant === 'compact') {
     return (
       <div className="mt-auto pt-6 border-t border-zinc-200 dark:border-zinc-800">
-        <p className="text-[11px] font-bold uppercase tracking-tight mb-3 text-neutral-900 dark:text-white">
+        <h4 className="text-[11px] font-bold uppercase tracking-tight mb-3 text-neutral-900 dark:text-white">
           Get the Weekly Pulse
-        </p>
+        </h4>
         {status === 'success' ? (
           <div className="p-3 bg-zinc-100 dark:bg-zinc-850 border border-zinc-300 dark:border-zinc-700 text-xs font-bold text-neutral-900 dark:text-white flex items-center gap-2">
             <Check className="w-4 h-4 text-blue-600" />
@@ -66,15 +66,15 @@ export const NewsletterCTA: React.FC<NewsletterCTAProps> = ({ variant = 'card' }
   }
 
   return (
-    <div className="my-16 p-8 sm:p-12 border border-black dark:border-white bg-white dark:bg-[#0a0a0a]">
+    <section className="my-16 p-8 sm:p-12 border border-black dark:border-white bg-white dark:bg-[#0a0a0a]">
       <div className="max-w-2xl mx-auto text-center space-y-4">
         <span className="text-[10px] font-bold uppercase tracking-[0.2em] bg-blue-600 text-white px-2.5 py-1 inline-block">
           Newsletter
         </span>
 
-        <h3 className="text-2xl sm:text-3xl font-black tracking-tighter uppercase text-neutral-900 dark:text-white">
+        <h2 className="text-2xl sm:text-3xl font-black tracking-tighter uppercase text-neutral-900 dark:text-white">
           Architectural Briefings, Every Thursday
-        </h3>
+        </h2>
 
         <p className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400 max-w-lg mx-auto">
           Join 28,000+ lead software engineers and researchers receiving distilled breakdowns of AI infrastructure, systems design, and cybersecurity.
@@ -112,6 +112,6 @@ export const NewsletterCTA: React.FC<NewsletterCTAProps> = ({ variant = 'card' }
           </form>
         )}
       </div>
-    </div>
+    </section>
   );
 };

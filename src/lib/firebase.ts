@@ -1,5 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import {
+  initializeFirestore,
   getFirestore,
   collection,
   doc,
@@ -27,11 +28,24 @@ const firebaseConfig = {
 
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
-// Initialize Firestore with custom databaseId if configured
-export const db: Firestore = firebaseConfigJson.firestoreDatabaseId
-  ? getFirestore(app, firebaseConfigJson.firestoreDatabaseId)
-  : getFirestore(app);
+// Initialize Firestore with custom databaseId if configured and long-polling support for sandboxed/proxied environments
+let firestoreInstance: Firestore;
+try {
+  firestoreInstance = initializeFirestore(
+    app,
+    {
+      experimentalAutoDetectLongPolling: true,
+      ignoreUndefinedProperties: true,
+    },
+    firebaseConfigJson.firestoreDatabaseId || undefined
+  );
+} catch {
+  firestoreInstance = firebaseConfigJson.firestoreDatabaseId
+    ? getFirestore(app, firebaseConfigJson.firestoreDatabaseId)
+    : getFirestore(app);
+}
 
+export const db: Firestore = firestoreInstance;
 export const auth: Auth = getAuth(app);
 
 export {
