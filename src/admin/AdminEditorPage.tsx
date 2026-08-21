@@ -97,13 +97,13 @@ export const AdminEditorPage: React.FC = () => {
       setKeyTakeawaysInput(Array.isArray(existingPost.keyTakeaways) ? existingPost.keyTakeaways.join('\n') : '');
     } else {
       // Default template for new post
-      setContent(`## Executive Summary
+      setContent(`### Executive Summary
 
 Provide a high-level architectural overview of the system, problem statement, and engineering benchmarks.
 
 ---
 
-## Core Engineering Analysis
+### Core Engineering Analysis
 
 Explain the internal mechanics, memory profiles, or protocol interactions.
 
@@ -117,7 +117,7 @@ export async function handleRequest(req: Request): Promise<Response> {
 
 ---
 
-## Key Benchmark Results
+### Key Benchmark Results
 
 | Metric | Baseline | Optimized Architecture |
 | :--- | :--- | :--- |
@@ -126,7 +126,7 @@ export async function handleRequest(req: Request): Promise<Response> {
 
 ---
 
-## Architectural Takeaways
+### Architectural Takeaways
 
 - Implement zero-allocation buffers
 - Enforce strict JSON schema validation
@@ -713,9 +713,9 @@ export async function handleRequest(req: Request): Promise<Response> {
           
           {/* Metadata Card */}
           <div className="p-6 bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-zinc-800 space-y-4">
-            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">
               Publication Settings
-            </h2>
+            </h3>
 
             {/* Category */}
             <div>
@@ -819,9 +819,9 @@ export async function handleRequest(req: Request): Promise<Response> {
 
           {/* SEO & Social Metadata Drawer */}
           <div className="p-6 bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-zinc-800 space-y-4">
-            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">
               SEO & Social Metadata
-            </h2>
+            </h3>
 
             <div>
               <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-1">

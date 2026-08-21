@@ -3,15 +3,18 @@ import { useRouter } from '../router/RouterContext';
 import { useBlog } from '../context/BlogContext';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { SEOHead } from '../components/SEOHead';
+import { getRateLimitState } from '../utils/security';
 import {
   Shield,
   KeyRound,
   ArrowRight,
+  Lock,
   AlertCircle,
   ArrowLeft,
   Eye,
   EyeOff,
   Clock,
+  CheckCircle2,
 } from 'lucide-react';
 
 export const AdminLoginPage: React.FC = () => {
@@ -31,14 +34,21 @@ export const AdminLoginPage: React.FC = () => {
     }
   }, [isAdminAuthenticated, navigate]);
 
-  // Lockout countdown timer
+  // Check rate-limiting status on load and countdown timer
   useEffect(() => {
-    if (lockoutTimeLeft === null || lockoutTimeLeft <= 0) return;
-    const interval = setInterval(() => {
-      setLockoutTimeLeft((prev) => (prev && prev > 1 ? prev - 1 : null));
-    }, 1000);
+    const checkRateLimit = () => {
+      const state = getRateLimitState();
+      if (state.lockoutUntil && state.lockoutUntil > Date.now()) {
+        setLockoutTimeLeft(Math.ceil((state.lockoutUntil - Date.now()) / 1000));
+      } else {
+        setLockoutTimeLeft(null);
+      }
+    };
+
+    checkRateLimit();
+    const interval = setInterval(checkRateLimit, 1000);
     return () => clearInterval(interval);
-  }, [lockoutTimeLeft]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,8 +66,9 @@ export const AdminLoginPage: React.FC = () => {
         navigate('/admin');
       } else {
         setError(res.reason || 'Authentication failed. Please verify your administrator passkey.');
-        if (res.lockoutSeconds && res.lockoutSeconds > 0) {
-          setLockoutTimeLeft(res.lockoutSeconds);
+        const state = getRateLimitState();
+        if (state.lockoutUntil && state.lockoutUntil > Date.now()) {
+          setLockoutTimeLeft(Math.ceil((state.lockoutUntil - Date.now()) / 1000));
         }
       }
     } catch {
@@ -79,7 +90,7 @@ export const AdminLoginPage: React.FC = () => {
         <button
           id="login-back-btn"
           onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-xs font-semibold text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer"
+          className="flex items-center gap-2 text-xs font-semibold text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> Back to Tutorials & Code
         </button>
@@ -98,7 +109,7 @@ export const AdminLoginPage: React.FC = () => {
               Tutorials & Code CMS Gateway
             </h1>
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              Server-authoritative session authentication and rate-limited credential verification.
+              Encrypted administrative access for publication & database management.
             </p>
           </div>
 
@@ -153,7 +164,7 @@ export const AdminLoginPage: React.FC = () => {
                 id="authenticate-session-btn"
                 type="submit"
                 disabled={isSubmitting || !password.trim()}
-                className="w-full py-2.5 px-4 text-sm font-semibold rounded-xl bg-black dark:bg-white text-white dark:text-black hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full py-2.5 px-4 text-sm font-semibold rounded-xl bg-black dark:bg-white text-white dark:text-black hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <>
@@ -173,7 +184,7 @@ export const AdminLoginPage: React.FC = () => {
           {/* Security Tier Badge */}
           <div className="mt-6 pt-5 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-center gap-2 text-[11px] text-zinc-500 dark:text-zinc-400">
             <Shield className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Bcrypt Server Verification & Brute-Force Rate Limiting</span>
+            <span>SHA-256 Salted Cryptographic Verification & Brute-Force Defense</span>
           </div>
 
         </div>
@@ -181,7 +192,7 @@ export const AdminLoginPage: React.FC = () => {
 
       {/* Footer */}
       <footer className="text-center text-xs text-zinc-400 dark:text-zinc-500 font-mono">
-        Tutorials and Code Editorial Engine • Server-Authoritative Security
+        Tutorials and Code Editorial Engine • Zero-Trust Session Control
       </footer>
 
     </div>

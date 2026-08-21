@@ -1,17 +1,19 @@
-import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { Post, Category, Author, NewsletterSubscriber, SiteSettings, PageMetaConfig } from '../types';
 import { INITIAL_POSTS } from '../data/initialPosts';
 import { INITIAL_CATEGORIES } from '../data/categories';
 import { INITIAL_AUTHORS } from '../data/authors';
 import {
-  loginAdminServer,
-  checkAdminSessionServer,
-  logoutAdminServer,
+  verifyAdminPassword,
+  createAdminSession,
+  getValidAdminSession,
+  clearAdminSession,
 } from '../utils/security';
 import {
   db,
   collection,
   doc,
+  getDocs,
   setDoc,
   updateDoc,
   deleteDoc,
@@ -24,6 +26,7 @@ const STORAGE_KEY_CATEGORIES = 'tutorialsandcode_categories_v1';
 const STORAGE_KEY_AUTHORS = 'tutorialsandcode_authors_v1';
 const STORAGE_KEY_SUBSCRIBERS = 'tutorialsandcode_subscribers_v1';
 const STORAGE_KEY_SETTINGS = 'tutorialsandcode_settings_v1';
+const STORAGE_KEY_AUTH = 'tutorialsandcode_admin_auth_v1';
 
 export const DEFAULT_PAGE_META_OVERRIDES: Record<string, PageMetaConfig> = {
   '/': {
@@ -123,8 +126,8 @@ interface BlogContextType {
   isAdminAuthenticated: boolean;
   isFirebaseConnected: boolean;
   lastCloudSync: Date | null;
-  loginAdmin: (password: string) => Promise<{ success: boolean; reason?: string; lockoutSeconds?: number }>;
-  logoutAdmin: () => Promise<void>;
+  loginAdmin: (password: string) => Promise<{ success: boolean; reason?: string }>;
+  logoutAdmin: () => void;
   createPost: (post: Omit<Post, 'id' | 'views'>) => Promise<Post>;
   updatePost: (id: string, post: Partial<Post>) => Promise<void>;
   deletePost: (id: string) => Promise<void>;
@@ -225,24 +228,29 @@ export function BlogProvider({ children }: { children: React.ReactNode }) {
     return DEFAULT_SETTINGS;
   });
 
-  // Authentication State is purely server-authoritative
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(false);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const validSession = getValidAdminSession();
+      return Boolean(validSession);
+    }
+    return false;
+  });
+
   const [isFirebaseConnected, setIsFirebaseConnected] = useState<boolean>(false);
   const [lastCloudSync, setLastCloudSync] = useState<Date | null>(null);
 
-  // Check server session on mount and periodically
-  const checkSession = useCallback(async () => {
-    const session = await checkAdminSessionServer();
-    setIsAdminAuthenticated(session.authenticated);
-  }, []);
-
+  // Periodic session validity check
   useEffect(() => {
-    checkSession();
-    const interval = setInterval(checkSession, 60000);
+    const interval = setInterval(() => {
+      const validSession = getValidAdminSession();
+      if (!validSession && isAdminAuthenticated) {
+        setIsAdminAuthenticated(false);
+      }
+    }, 60000);
     return () => clearInterval(interval);
-  }, [checkSession]);
+  }, [isAdminAuthenticated]);
 
-  // Sync to LocalStorage as offline / instant fallback for reader speed
+  // Sync to LocalStorage as offline / instant fallback
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(posts));
   }, [posts]);
@@ -263,6 +271,10 @@ export function BlogProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(siteSettings));
   }, [siteSettings]);
 
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY_AUTH, isAdminAuthenticated ? 'true' : 'false');
+  }, [isAdminAuthenticated]);
+
   // Firestore Real-Time Subscriptions & Auto-Seeding
   useEffect(() => {
     let unsubscribePosts: (() => void) | undefined;
@@ -279,6 +291,8 @@ export function BlogProvider({ children }: { children: React.ReactNode }) {
           postsCol,
           async (snapshot) => {
             if (snapshot.empty) {
+              // Seed initial posts to Firestore
+              console.log('Seeding initial posts to Firestore...');
               const batch = writeBatch(db);
               INITIAL_POSTS.forEach((post) => {
                 const pDoc = doc(db, 'posts', post.id);
@@ -437,150 +451,94 @@ export function BlogProvider({ children }: { children: React.ReactNode }) {
       .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
   }, [posts]);
 
-  // Auth Methods (Server-Authoritative)
-  const loginAdmin = async (password: string): Promise<{ success: boolean; reason?: string; lockoutSeconds?: number }> => {
-    const result = await loginAdminServer(password);
+  // Auth Methods
+  const loginAdmin = async (password: string): Promise<{ success: boolean; reason?: string }> => {
+    const result = await verifyAdminPassword(password, siteSettings?.customAdminPasswordHash);
     if (result.success) {
+      createAdminSession();
       setIsAdminAuthenticated(true);
       return { success: true };
     }
     return {
       success: false,
-      reason: result.error || 'Invalid administrator credentials.',
-      lockoutSeconds: result.lockoutSeconds,
+      reason: result.reason || 'Invalid admin credentials.',
     };
   };
 
-  const logoutAdmin = async () => {
-    await logoutAdminServer();
+  const logoutAdmin = () => {
+    clearAdminSession();
     setIsAdminAuthenticated(false);
   };
 
-  // Post Actions (Server API + Firestore Sync + Optimistic State)
+  // Post Actions (Firestore + Optimistic State)
   const createPost = async (postData: Omit<Post, 'id' | 'views'>): Promise<Post> => {
-    // 1. Call server API
-    const res = await fetch('/api/admin/posts', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-action': 'create-post',
-      },
-      credentials: 'include',
-      body: JSON.stringify(postData),
-    });
+    const newId = `post-${Date.now()}`;
+    const newPost: Post = {
+      ...postData,
+      id: newId,
+      views: 0,
+    };
 
-    if (res.status === 401) {
-      setIsAdminAuthenticated(false);
-      throw new Error('Unauthorized: Admin session expired or invalid.');
-    }
-
-    const json = await res.json();
-    if (!res.ok) {
-      throw new Error(json.error || 'Failed to create article on server.');
-    }
-
-    const newPost = json.data as Post;
     setPosts((prev) => [newPost, ...prev]);
 
-    // Background sync to Firestore client instance
     try {
-      await setDoc(doc(db, 'posts', newPost.id), newPost);
+      await setDoc(doc(db, 'posts', newId), newPost);
       setLastCloudSync(new Date());
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('Firestore createPost error:', err);
     }
 
     return newPost;
   };
 
   const updatePost = async (id: string, updatedData: Partial<Post>) => {
-    const res = await fetch(`/api/admin/posts/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-action': 'update-post',
-      },
-      credentials: 'include',
-      body: JSON.stringify(updatedData),
-    });
+    const updatePayload = {
+      ...updatedData,
+      updatedAt: new Date().toISOString(),
+    };
 
-    if (res.status === 401) {
-      setIsAdminAuthenticated(false);
-      throw new Error('Unauthorized: Admin session expired.');
-    }
-
-    const json = await res.json();
-    if (!res.ok) {
-      throw new Error(json.error || 'Failed to update article on server.');
-    }
-
-    const updatedPost = json.data as Post;
-    setPosts((prev) => prev.map((p) => (p.id === id ? updatedPost : p)));
+    setPosts((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, ...updatePayload } : p))
+    );
 
     try {
-      await updateDoc(doc(db, 'posts', id), updatedData);
+      await updateDoc(doc(db, 'posts', id), updatePayload);
       setLastCloudSync(new Date());
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('Firestore updatePost error:', err);
     }
   };
 
   const deletePost = async (id: string) => {
-    const res = await fetch(`/api/admin/posts/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'x-admin-action': 'delete-post',
-      },
-      credentials: 'include',
-    });
-
-    if (res.status === 401) {
-      setIsAdminAuthenticated(false);
-      throw new Error('Unauthorized: Admin session expired.');
-    }
-
-    if (!res.ok) {
-      const json = await res.json();
-      throw new Error(json.error || 'Failed to delete article on server.');
-    }
-
     setPosts((prev) => prev.filter((p) => p.id !== id));
 
     try {
       await deleteDoc(doc(db, 'posts', id));
       setLastCloudSync(new Date());
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('Firestore deletePost error:', err);
     }
   };
 
   const togglePostStatus = async (id: string) => {
-    const res = await fetch(`/api/admin/posts/${id}/status`, {
-      method: 'PATCH',
-      headers: {
-        'x-admin-action': 'toggle-status',
-      },
-      credentials: 'include',
-    });
+    const targetPost = posts.find((p) => p.id === id);
+    if (!targetPost) return;
 
-    if (res.status === 401) {
-      setIsAdminAuthenticated(false);
-      throw new Error('Unauthorized: Admin session expired.');
-    }
+    const nextStatus: 'draft' | 'published' = targetPost.status === 'published' ? 'draft' : 'published';
+    const updatePayload = {
+      status: nextStatus,
+      updatedAt: new Date().toISOString(),
+    };
 
-    const json = await res.json();
-    if (!res.ok) {
-      throw new Error(json.error || 'Failed to toggle status on server.');
-    }
-
-    const updatedPost = json.data as Post;
-    setPosts((prev) => prev.map((p) => (p.id === id ? updatedPost : p)));
+    setPosts((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, ...updatePayload } : p))
+    );
 
     try {
-      await updateDoc(doc(db, 'posts', id), { status: updatedPost.status, updatedAt: updatedPost.updatedAt });
+      await updateDoc(doc(db, 'posts', id), updatePayload);
       setLastCloudSync(new Date());
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('Firestore togglePostStatus error:', err);
     }
   };
 
@@ -590,274 +548,144 @@ export function BlogProvider({ children }: { children: React.ReactNode }) {
     );
 
     try {
-      await fetch(`/api/posts/${id}/views`, { method: 'POST' });
+      const currentPost = posts.find((p) => p.id === id);
+      const newViews = (currentPost?.views || 0) + 1;
+      await updateDoc(doc(db, 'posts', id), { views: newViews });
     } catch {
-      // background
+      // Background non-blocking increment
     }
   };
 
   // Category Actions
   const addCategory = async (categoryData: Omit<Category, 'id'>): Promise<Category> => {
-    const res = await fetch('/api/admin/categories', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-action': 'create-category',
-      },
-      credentials: 'include',
-      body: JSON.stringify(categoryData),
-    });
+    const newId = `cat-${Date.now()}`;
+    const newCat: Category = {
+      ...categoryData,
+      id: newId,
+    };
 
-    if (res.status === 401) {
-      setIsAdminAuthenticated(false);
-      throw new Error('Unauthorized: Admin session expired.');
-    }
-
-    const json = await res.json();
-    if (!res.ok) {
-      throw new Error(json.error || 'Failed to create category on server.');
-    }
-
-    const newCat = json.data as Category;
     setCategories((prev) => [...prev, newCat]);
 
     try {
-      await setDoc(doc(db, 'categories', newCat.id), newCat);
+      await setDoc(doc(db, 'categories', newId), newCat);
       setLastCloudSync(new Date());
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('Firestore addCategory error:', err);
     }
 
     return newCat;
   };
 
   const updateCategory = async (id: string, updatedData: Partial<Category>) => {
-    const res = await fetch(`/api/admin/categories/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-action': 'update-category',
-      },
-      credentials: 'include',
-      body: JSON.stringify(updatedData),
-    });
-
-    if (res.status === 401) {
-      setIsAdminAuthenticated(false);
-      throw new Error('Unauthorized: Admin session expired.');
-    }
-
-    const json = await res.json();
-    if (!res.ok) {
-      throw new Error(json.error || 'Failed to update category on server.');
-    }
-
-    const updatedCat = json.data as Category;
-    setCategories((prev) => prev.map((c) => (c.id === id ? updatedCat : c)));
+    setCategories((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, ...updatedData } : c))
+    );
 
     try {
       await updateDoc(doc(db, 'categories', id), updatedData);
       setLastCloudSync(new Date());
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('Firestore updateCategory error:', err);
     }
   };
 
   const deleteCategory = async (id: string) => {
-    const res = await fetch(`/api/admin/categories/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'x-admin-action': 'delete-category',
-      },
-      credentials: 'include',
-    });
-
-    if (res.status === 401) {
-      setIsAdminAuthenticated(false);
-      throw new Error('Unauthorized: Admin session expired.');
-    }
-
-    if (!res.ok) {
-      const json = await res.json();
-      throw new Error(json.error || 'Failed to delete category on server.');
-    }
-
     setCategories((prev) => prev.filter((c) => c.id !== id));
 
     try {
       await deleteDoc(doc(db, 'categories', id));
       setLastCloudSync(new Date());
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('Firestore deleteCategory error:', err);
     }
   };
 
   // Author Actions
   const addAuthor = async (authorData: Omit<Author, 'id'>): Promise<Author> => {
-    const res = await fetch('/api/admin/authors', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-action': 'create-author',
-      },
-      credentials: 'include',
-      body: JSON.stringify(authorData),
-    });
+    const newId = `auth-${Date.now()}`;
+    const newAuthor: Author = {
+      ...authorData,
+      id: newId,
+    };
 
-    if (res.status === 401) {
-      setIsAdminAuthenticated(false);
-      throw new Error('Unauthorized: Admin session expired.');
-    }
-
-    const json = await res.json();
-    if (!res.ok) {
-      throw new Error(json.error || 'Failed to create author on server.');
-    }
-
-    const newAuthor = json.data as Author;
     setAuthors((prev) => [...prev, newAuthor]);
 
     try {
-      await setDoc(doc(db, 'authors', newAuthor.id), newAuthor);
+      await setDoc(doc(db, 'authors', newId), newAuthor);
       setLastCloudSync(new Date());
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('Firestore addAuthor error:', err);
     }
 
     return newAuthor;
   };
 
   const updateAuthor = async (id: string, updatedData: Partial<Author>) => {
-    const res = await fetch(`/api/admin/authors/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-action': 'update-author',
-      },
-      credentials: 'include',
-      body: JSON.stringify(updatedData),
-    });
-
-    if (res.status === 401) {
-      setIsAdminAuthenticated(false);
-      throw new Error('Unauthorized: Admin session expired.');
-    }
-
-    const json = await res.json();
-    if (!res.ok) {
-      throw new Error(json.error || 'Failed to update author on server.');
-    }
-
-    const updatedAuthor = json.data as Author;
-    setAuthors((prev) => prev.map((a) => (a.id === id ? updatedAuthor : a)));
+    setAuthors((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, ...updatedData } : a))
+    );
 
     try {
       await updateDoc(doc(db, 'authors', id), updatedData);
       setLastCloudSync(new Date());
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('Firestore updateAuthor error:', err);
     }
   };
 
   const deleteAuthor = async (id: string) => {
-    const res = await fetch(`/api/admin/authors/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'x-admin-action': 'delete-author',
-      },
-      credentials: 'include',
-    });
-
-    if (res.status === 401) {
-      setIsAdminAuthenticated(false);
-      throw new Error('Unauthorized: Admin session expired.');
-    }
-
-    if (!res.ok) {
-      const json = await res.json();
-      throw new Error(json.error || 'Failed to delete author on server.');
-    }
-
     setAuthors((prev) => prev.filter((a) => a.id !== id));
 
     try {
       await deleteDoc(doc(db, 'authors', id));
       setLastCloudSync(new Date());
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('Firestore deleteAuthor error:', err);
     }
   };
 
   // Newsletter Subscription
   const subscribeNewsletter = async (email: string) => {
     const trimmed = email.trim().toLowerCase();
-    try {
-      const res = await fetch('/api/newsletter/subscribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: trimmed }),
-      });
-
-      const json = await res.json();
-      if (!res.ok) {
-        return { success: false, message: json.error || 'Subscription failed.' };
-      }
-
-      return { success: true, message: json.message || 'Thank you for subscribing to Tutorials and Code.' };
-    } catch {
-      return { success: false, message: 'Unable to process subscription right now.' };
+    if (!trimmed || !trimmed.includes('@') || !trimmed.includes('.')) {
+      return { success: false, message: 'Please enter a valid email address.' };
     }
+    const exists = subscribers.some((s) => s.email.toLowerCase() === trimmed);
+    if (exists) {
+      return { success: true, message: "You're already subscribed! Thank you." };
+    }
+    const newSub: NewsletterSubscriber = {
+      id: `sub-${Date.now()}`,
+      email: trimmed,
+      subscribedAt: new Date().toISOString(),
+    };
+
+    setSubscribers((prev) => [newSub, ...prev]);
+
+    try {
+      await setDoc(doc(db, 'subscribers', newSub.id), newSub);
+      setLastCloudSync(new Date());
+    } catch (err) {
+      console.error('Firestore subscribe error:', err);
+    }
+
+    return { success: true, message: 'Thank you for subscribing to Tutorials and Code.' };
   };
 
   // Settings
   const updateSiteSettings = async (settings: Partial<SiteSettings>) => {
-    const res = await fetch('/api/admin/settings', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-action': 'update-settings',
-      },
-      credentials: 'include',
-      body: JSON.stringify(settings),
-    });
-
-    if (res.status === 401) {
-      setIsAdminAuthenticated(false);
-      throw new Error('Unauthorized: Admin session expired.');
-    }
-
-    const json = await res.json();
-    if (!res.ok) {
-      throw new Error(json.error || 'Failed to update settings on server.');
-    }
-
-    const updated = json.data as SiteSettings;
+    const updated = { ...siteSettings, ...settings };
     setSiteSettings(updated);
 
     try {
       await setDoc(doc(db, 'siteSettings', 'global'), updated);
       setLastCloudSync(new Date());
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('Firestore updateSiteSettings error:', err);
     }
   };
 
   const resetToDefaults = async () => {
-    const res = await fetch('/api/admin/reset-defaults', {
-      method: 'POST',
-      headers: {
-        'x-admin-action': 'reset-defaults',
-      },
-      credentials: 'include',
-    });
-
-    if (res.status === 401) {
-      setIsAdminAuthenticated(false);
-      throw new Error('Unauthorized: Admin session expired.');
-    }
-
     setPosts(INITIAL_POSTS);
     setCategories(INITIAL_CATEGORIES);
     setAuthors(INITIAL_AUTHORS);

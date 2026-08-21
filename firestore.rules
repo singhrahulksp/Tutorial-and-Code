@@ -3,41 +3,32 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helper function for email validation
-    function isValidEmail(email) {
-      return email is string && email.size() >= 5 && email.size() <= 150 && email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
-    }
-
-    // Posts collection: Public read for published posts & site discovery
+    // Posts collection: Public read, open write for CMS editing
     match /posts/{postId} {
       allow read: if true;
-      // Writes are gated server-side; client writes require authenticated credentials
-      allow create, update, delete: if request.auth != null || true;
+      allow write: if true;
     }
     
-    // Categories taxonomy: Public read
+    // Categories taxonomy: Public read, open write for CMS editing
     match /categories/{categoryId} {
       allow read: if true;
-      allow write: if request.auth != null || true;
+      allow write: if true;
     }
     
-    // Authors collection: Public read
+    // Authors collection: Public read, open write for CMS editing
     match /authors/{authorId} {
       allow read: if true;
-      allow write: if request.auth != null || true;
+      allow write: if true;
     }
     
-    // Subscribers collection: Public create for newsletter opt-in with strict validation
+    // Subscribers collection: Public create for newsletter signups, read/write for admin
     match /subscribers/{subscriberId} {
-      allow read: if request.auth != null || true;
-      allow create: if request.resource.data.email is string && request.resource.data.email.size() <= 150;
-      allow update, delete: if request.auth != null || true;
+      allow read, write: if true;
     }
     
-    // Site settings: Public read for site metadata, gated writes
+    // Site settings: Public read, write for configuration
     match /siteSettings/{settingId} {
-      allow read: if true;
-      allow write: if request.auth != null || true;
+      allow read, write: if true;
     }
   }
 }

@@ -492,9 +492,9 @@ export const AdminSEOManager: React.FC = () => {
                 </div>
 
                 {/* Search result title */}
-                <div className="text-base sm:text-lg font-medium text-[#1a0dab] dark:text-[#8ab4f8] hover:underline cursor-pointer leading-tight pt-1">
+                <h4 className="text-base sm:text-lg font-medium text-[#1a0dab] dark:text-[#8ab4f8] hover:underline cursor-pointer leading-tight pt-1">
                   {displayTitle}
-                </div>
+                </h4>
 
                 {/* Search result snippet */}
                 <p className="text-xs sm:text-[13px] text-[#4d5156] dark:text-[#bdc1c6] leading-relaxed line-clamp-3">
@@ -527,9 +527,9 @@ export const AdminSEOManager: React.FC = () => {
                   <div className="text-[10px] uppercase font-mono text-zinc-400 truncate">
                     {siteBase.replace('https://', '')}
                   </div>
-                  <div className="text-xs font-bold text-neutral-900 dark:text-white truncate">
+                  <h4 className="text-xs font-bold text-neutral-900 dark:text-white truncate">
                     {displayTitle}
-                  </div>
+                  </h4>
                   <p className="text-[11px] text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
                     {displayDesc}
                   </p>
@@ -540,7 +540,7 @@ export const AdminSEOManager: React.FC = () => {
 
           {/* Quick Page Links & Inspection */}
           <div className="p-4 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 space-y-3">
-            <h3 className="text-xs font-black uppercase tracking-wider text-neutral-900 dark:text-white flex items-center justify-between">
+            <h4 className="text-xs font-black uppercase tracking-wider text-neutral-900 dark:text-white flex items-center justify-between">
               <span>Inspect Live Page</span>
               <a
                 href={selectedPath}
@@ -551,7 +551,7 @@ export const AdminSEOManager: React.FC = () => {
                 <span>Open {selectedPath}</span>
                 <ExternalLink className="w-3 h-3" />
               </a>
-            </h3>
+            </h4>
             <p className="text-[11px] text-zinc-500 leading-relaxed">
               When you save changes, all <code className="font-mono text-zinc-600 dark:text-zinc-400">&lt;title&gt;</code>, <code className="font-mono text-zinc-600 dark:text-zinc-400">&lt;meta name="description"&gt;</code>, OpenGraph tags, and <code className="font-mono text-zinc-600 dark:text-zinc-400">&lt;link rel="canonical"&gt;</code> tags update in real-time across the client application and SSR crawls.
             </p>

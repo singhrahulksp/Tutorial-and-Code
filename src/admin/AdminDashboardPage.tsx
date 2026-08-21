@@ -142,9 +142,9 @@ export const AdminDashboardPage: React.FC = () => {
       <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-xs overflow-hidden">
         <div className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-bold text-neutral-900 dark:text-white">
+            <h3 className="text-sm font-bold text-neutral-900 dark:text-white">
               Recent Editorial Publications
-            </h2>
+            </h3>
             <p className="text-xs text-neutral-500">Manage drafts, toggle publish status, and edit research pieces</p>
           </div>
           <button
