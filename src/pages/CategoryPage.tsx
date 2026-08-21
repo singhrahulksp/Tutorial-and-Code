@@ -97,9 +97,9 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({ slug }) => {
         {/* Subtopic Navigation Chips for Topical Authority */}
         {category.subtopics && category.subtopics.length > 0 && (
           <div className="mt-6 pt-6 border-t border-zinc-200 dark:border-zinc-800">
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2.5">
+            <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2.5">
               Core Subtopics & Focus Areas
-            </h3>
+            </div>
             <div className="flex flex-wrap gap-2">
               {category.subtopics.map((subtopic) => (
                 <button
@@ -147,9 +147,9 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({ slug }) => {
       {categoryPosts.length === 0 && (
         <div className="text-center py-20 bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-100 dark:border-zinc-800">
           <Layers className="w-10 h-10 text-zinc-400 mx-auto mb-3" />
-          <h3 className="text-lg font-black uppercase tracking-tight text-neutral-900 dark:text-white">
+          <h2 className="text-lg font-black uppercase tracking-tight text-neutral-900 dark:text-white">
             No articles published in {category.name} yet
-          </h3>
+          </h2>
           <p className="text-xs text-zinc-500 mt-1 max-w-sm mx-auto">
             Our editorial research team is preparing new breakdowns for this track.
           </p>

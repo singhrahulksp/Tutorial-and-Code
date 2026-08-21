@@ -122,9 +122,9 @@ export const DynamicSitemapGenerator: React.FC<DynamicSitemapGeneratorProps> = (
                 {crawlResult?.source === 'firestore' ? 'Database Source: Firestore Live' : 'Database Source: Local Sync'}
               </span>
             </div>
-            <h2 className="text-2xl font-bold text-neutral-900 dark:text-white tracking-tight">
+            <h1 className="text-2xl font-bold text-neutral-900 dark:text-white tracking-tight">
               Dynamic XML Sitemap Engine
-            </h2>
+            </h1>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-2xl">
               Crawls all published technical articles, category taxonomies, and author credentials directly from Firestore. Generates an indexable XML document complying with the Sitemaps.org 0.9 and Google News standards.
             </p>
@@ -444,9 +444,9 @@ export const DynamicSitemapGenerator: React.FC<DynamicSitemapGeneratorProps> = (
           <div className="p-6 bg-white dark:bg-[#0f0f0f] border border-zinc-200 dark:border-zinc-800 rounded-2xl space-y-4">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-              <h3 className="text-base font-bold text-neutral-900 dark:text-white">
+              <h2 className="text-base font-bold text-neutral-900 dark:text-white">
                 Sitemaps.org Specification Audit
-              </h3>
+              </h2>
             </div>
 
             <ul className="space-y-2.5 text-xs text-zinc-600 dark:text-zinc-400">
@@ -476,9 +476,9 @@ export const DynamicSitemapGenerator: React.FC<DynamicSitemapGeneratorProps> = (
           <div className="p-6 bg-white dark:bg-[#0f0f0f] border border-zinc-200 dark:border-zinc-800 rounded-2xl space-y-4">
             <div className="flex items-center gap-2">
               <Globe className="w-5 h-5 text-sky-500" />
-              <h3 className="text-base font-bold text-neutral-900 dark:text-white">
+              <h2 className="text-base font-bold text-neutral-900 dark:text-white">
                 Search Engine Submission Endpoints
-              </h3>
+              </h2>
             </div>
 
             <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">

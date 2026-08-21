@@ -37,9 +37,9 @@ export const TrendingSection: React.FC<TrendingSectionProps> = ({ posts }) => {
                 <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block mb-0.5">
                   {cat?.name || post.category}
                 </span>
-                <p className="text-[13px] font-bold leading-tight text-neutral-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+                <h3 className="text-[13px] font-bold leading-tight text-neutral-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
                   {post.title}
-                </p>
+                </h3>
               </div>
             </div>
           );

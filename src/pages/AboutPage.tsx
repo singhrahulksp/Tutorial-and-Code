@@ -103,7 +103,7 @@ export const AboutPage: React.FC = () => {
                 <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                   {author.name}
                 </h3>
-                <h4 className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider mt-0.5">{author.role}</h4>
+                <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider mt-0.5">{author.role}</p>
                 <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-2 line-clamp-2 leading-relaxed">
                   {author.bio}
                 </p>

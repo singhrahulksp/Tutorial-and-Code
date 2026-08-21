@@ -30,9 +30,9 @@ export const NewsletterCTA: React.FC<NewsletterCTAProps> = ({ variant = 'card' }
   if (variant === 'compact') {
     return (
       <div className="mt-auto pt-6 border-t border-zinc-200 dark:border-zinc-800">
-        <h4 className="text-[11px] font-bold uppercase tracking-tight mb-3 text-neutral-900 dark:text-white">
+        <h3 className="text-[11px] font-bold uppercase tracking-tight mb-3 text-neutral-900 dark:text-white">
           Get the Weekly Pulse
-        </h4>
+        </h3>
         {status === 'success' ? (
           <div className="p-3 bg-zinc-100 dark:bg-zinc-850 border border-zinc-300 dark:border-zinc-700 text-xs font-bold text-neutral-900 dark:text-white flex items-center gap-2">
             <Check className="w-4 h-4 text-blue-600" />

@@ -420,9 +420,9 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({ slug }) => {
             {/* Index Tags */}
             {post.tags && post.tags.length > 0 && (
               <div className="pt-8 border-t border-zinc-100 dark:border-zinc-800">
-                <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-3">
+                <div className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-3">
                   Index Tags
-                </h4>
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {post.tags.map((tag) => (
                     <button

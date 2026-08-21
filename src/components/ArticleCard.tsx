@@ -6,9 +6,14 @@ import { useBlog } from '../context/BlogContext';
 interface ArticleCardProps {
   post: Post;
   variant?: 'grid' | 'horizontal' | 'compact';
+  headingLevel?: 'h2' | 'h3' | 'h4';
 }
 
-export const ArticleCard: React.FC<ArticleCardProps> = ({ post, variant = 'grid' }) => {
+export const ArticleCard: React.FC<ArticleCardProps> = ({
+  post,
+  variant = 'grid',
+  headingLevel: HeadingTag = 'h3',
+}) => {
   const { navigate } = useRouter();
   const { getAuthorById, categories } = useBlog();
 
@@ -36,15 +41,15 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ post, variant = 'grid'
           />
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="text-[9px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest block mb-0.5">
+          <span className="text-[9px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest block mb-0.5">
             {category?.name || post.category}
-          </h4>
-          <h3 className="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
+          </span>
+          <HeadingTag className="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
             {post.title}
-          </h3>
-          <h5 className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider mt-1">
+          </HeadingTag>
+          <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider mt-1">
             {post.readingTime} min • {formattedDate}
-          </h5>
+          </div>
         </div>
       </article>
     );
@@ -66,23 +71,23 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ post, variant = 'grid'
         </div>
 
         <div className="flex-1 min-w-0 space-y-2">
-          <h4 className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest block">
+          <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest block">
             {category?.name || post.category}
-          </h4>
-          <h3 className="text-lg sm:text-xl font-bold leading-snug tracking-tight text-neutral-950 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+          </span>
+          <HeadingTag className="text-lg sm:text-xl font-bold leading-snug tracking-tight text-neutral-950 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
             {post.title}
-          </h3>
+          </HeadingTag>
           <p className="text-[13px] text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
             {post.description}
           </p>
 
-          <h5 className="pt-2 flex items-center gap-3 text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
+          <div className="pt-2 flex items-center gap-3 text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
             <span>{author?.name || 'Staff'}</span>
             <span>•</span>
             <span>{post.readingTime} min read</span>
             <span>•</span>
             <span>{formattedDate}</span>
-          </h5>
+          </div>
         </div>
       </article>
     );
@@ -104,23 +109,23 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ post, variant = 'grid'
       </div>
 
       <div className="space-y-1.5 flex-1 flex flex-col">
-        <h4 className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest block">
+        <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest block">
           {category?.name || post.category}
-        </h4>
+        </span>
 
-        <h3 className="font-bold text-base sm:text-lg leading-tight tracking-tight text-neutral-950 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+        <HeadingTag className="font-bold text-base sm:text-lg leading-tight tracking-tight text-neutral-950 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
           {post.title}
-        </h3>
+        </HeadingTag>
 
         <p className="text-[13px] text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
           {post.description}
         </p>
 
-        <h5 className="mt-auto pt-2 flex items-center gap-2 text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
+        <div className="mt-auto pt-2 flex items-center gap-2 text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
           <span>{author?.name || 'Staff'}</span>
           <span>•</span>
           <span>{post.readingTime} min</span>
-        </h5>
+        </div>
       </div>
     </article>
   );

@@ -51,9 +51,17 @@ export const HomePage: React.FC = () => {
         structuredData={[orgSchema, websiteSchema]}
       />
 
+      {/* Primary Semantic H1 for Homepage SEO */}
+      <h1 className="sr-only">
+        Tutorials and Code — Technical Journalism, AI Systems & Software Architecture
+      </h1>
+
       {/* Hero Section (8-col Hero + 4-col Stacked Secondary Stories) */}
       {featuredPost && (
-        <FeaturedCard post={featuredPost} secondaryPosts={secondaryPosts} />
+        <section aria-label="Featured Story" className="mb-14">
+          <h2 className="sr-only">Lead Technical Analysis & Featured Dispatches</h2>
+          <FeaturedCard post={featuredPost} secondaryPosts={secondaryPosts} />
+        </section>
       )}
 
       {/* Editorial Dual Section: 8-col Latest Insights + 4-col Trending & Weekly Pulse */}
@@ -76,7 +84,7 @@ export const HomePage: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               {latestInsights.map((post) => (
-                <ArticleCard key={post.id} post={post} variant="grid" />
+                <ArticleCard key={post.id} post={post} variant="grid" headingLevel="h3" />
               ))}
             </div>
           </div>
@@ -102,15 +110,15 @@ export const HomePage: React.FC = () => {
                       {num}
                     </span>
                     <div>
-                      <h4 className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block mb-0.5">
+                      <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block mb-0.5">
                         {cat?.name || post.category}
-                      </h4>
+                      </span>
                       <h3 className="text-[13px] font-bold leading-tight text-neutral-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
                         {post.title}
                       </h3>
-                      <h5 className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider mt-1">
+                      <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider mt-1">
                         Rank #{idx + 1} Trending
-                      </h5>
+                      </div>
                     </div>
                   </div>
                 );
