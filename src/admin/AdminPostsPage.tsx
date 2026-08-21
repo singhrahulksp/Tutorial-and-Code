@@ -244,7 +244,7 @@ export const AdminPostsPage: React.FC = () => {
               <AlertCircle className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-neutral-900 dark:text-white">Delete Article?</h3>
+              <h2 className="text-base font-bold text-neutral-900 dark:text-white">Delete Article?</h2>
               <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
                 This action will permanently remove this publication from the local database and public feeds.
               </p>

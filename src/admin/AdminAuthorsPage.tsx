@@ -110,10 +110,10 @@ export const AdminAuthorsPage: React.FC = () => {
         {/* Author Form */}
         <div className="lg:col-span-5">
           <div className="p-6 bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-zinc-800">
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-6 flex items-center gap-2">
+            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-6 flex items-center gap-2">
               <User className="w-4 h-4" />
               {editingAuthor ? `Edit Profile: ${editingAuthor.name}` : 'Add New Contributor'}
-            </h3>
+            </h2>
 
             <form onSubmit={handleSave} className="space-y-4">
               <div>
@@ -264,9 +264,9 @@ export const AdminAuthorsPage: React.FC = () => {
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <h4 className="font-black text-sm uppercase tracking-tight text-neutral-900 dark:text-white">
+                    <h3 className="font-black text-sm uppercase tracking-tight text-neutral-900 dark:text-white">
                       {author.name}
-                    </h4>
+                    </h3>
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => startEdit(author)}

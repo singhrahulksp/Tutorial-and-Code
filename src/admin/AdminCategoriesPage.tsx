@@ -90,10 +90,10 @@ export const AdminCategoriesPage: React.FC = () => {
         {/* Left Form: Add / Edit Category */}
         <div className="lg:col-span-5">
           <div className="p-6 bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-zinc-800">
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-6 flex items-center gap-2">
+            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-6 flex items-center gap-2">
               <FolderTree className="w-4 h-4" />
               {editingCat ? `Edit Category: ${editingCat.name}` : 'Create New Category Track'}
-            </h3>
+            </h2>
 
             <form onSubmit={handleSave} className="space-y-4">
               <div>

@@ -62,7 +62,6 @@ export const FeaturedCard: React.FC<FeaturedCardProps> = ({ post, secondaryPosts
 
       {/* Col-4: Secondary Stories Stack */}
       <div className="lg:col-span-4 flex flex-col bg-white dark:bg-[#0a0a0a]">
-        <h2 className="sr-only">Top Engineering Stories</h2>
         {secondaryPosts.slice(0, 3).map((sPost, index) => {
           const sAuthor = getAuthorById(sPost.authorId);
           const sCat = categories.find((c) => c.slug === sPost.category);

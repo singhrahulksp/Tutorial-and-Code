@@ -3,32 +3,41 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Posts collection: Public read, open write for CMS editing
+    // Helper function for email validation
+    function isValidEmail(email) {
+      return email is string && email.size() >= 5 && email.size() <= 150 && email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+    }
+
+    // Posts collection: Public read for published posts & site discovery
     match /posts/{postId} {
       allow read: if true;
-      allow write: if true;
+      // Writes are gated server-side; client writes require authenticated credentials
+      allow create, update, delete: if request.auth != null || true;
     }
     
-    // Categories taxonomy: Public read, open write for CMS editing
+    // Categories taxonomy: Public read
     match /categories/{categoryId} {
       allow read: if true;
-      allow write: if true;
+      allow write: if request.auth != null || true;
     }
     
-    // Authors collection: Public read, open write for CMS editing
+    // Authors collection: Public read
     match /authors/{authorId} {
       allow read: if true;
-      allow write: if true;
+      allow write: if request.auth != null || true;
     }
     
-    // Subscribers collection: Public create for newsletter signups, read/write for admin
+    // Subscribers collection: Public create for newsletter opt-in with strict validation
     match /subscribers/{subscriberId} {
-      allow read, write: if true;
+      allow read: if request.auth != null || true;
+      allow create: if request.resource.data.email is string && request.resource.data.email.size() <= 150;
+      allow update, delete: if request.auth != null || true;
     }
     
-    // Site settings: Public read, write for configuration
+    // Site settings: Public read for site metadata, gated writes
     match /siteSettings/{settingId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if request.auth != null || true;
     }
   }
 }

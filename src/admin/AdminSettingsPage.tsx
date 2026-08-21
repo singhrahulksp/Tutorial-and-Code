@@ -3,7 +3,7 @@ import { useBlog } from '../context/BlogContext';
 import { useRouter } from '../router/RouterContext';
 import { AdminLayout } from './AdminLayout';
 import { AdminSEOManager } from './AdminSEOManager';
-import { computeHash, resetFailedLoginAttempts } from '../utils/security';
+import { changeAdminPasskeyServer } from '../utils/security';
 import {
   Download,
   RefreshCw,
@@ -93,15 +93,16 @@ export const AdminSettingsPage: React.FC = () => {
       return;
     }
 
-    const hashed = await computeHash(newPasskey);
-    await updateSiteSettings({
-      customAdminPasswordHash: hashed,
-    });
-    resetFailedLoginAttempts();
+    const result = await changeAdminPasskeyServer(newPasskey);
+    if (!result.success) {
+      setPasskeyError(result.error || 'Failed to update administrator passkey.');
+      return;
+    }
+
     setPasskeySuccess(true);
     setNewPasskey('');
     setConfirmPasskey('');
-    setToast('Master passkey updated with SHA-256 cryptographic salt.');
+    setToast('Master passkey updated with bcrypt cryptographic hash on server.');
     setTimeout(() => {
       setToast(null);
       setPasskeySuccess(false);
@@ -214,10 +215,10 @@ export const AdminSettingsPage: React.FC = () => {
           {/* Left: General Settings */}
           <div className="lg:col-span-7 space-y-8">
             <div className="p-6 bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-zinc-800">
-              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-6 flex items-center gap-2">
+              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-6 flex items-center gap-2">
                 <Globe className="w-4 h-4" />
                 Global Publication Configuration
-              </h3>
+              </h2>
 
               <form onSubmit={handleSaveSettings} className="space-y-4">
                 <div>
@@ -287,10 +288,10 @@ export const AdminSettingsPage: React.FC = () => {
             <div className="p-6 bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-zinc-800">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
+                  <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
                     <Mail className="w-4 h-4" />
                     Newsletter Subscribers ({subscribers.length})
-                  </h3>
+                  </h2>
                   <p className="text-[11px] text-zinc-500 mt-0.5">Opt-in readership synced with cloud storage</p>
                 </div>
 
@@ -326,10 +327,10 @@ export const AdminSettingsPage: React.FC = () => {
             {/* Cloud Firestore Status */}
             <div className="p-6 bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-zinc-800 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
+                <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
                   <Cloud className="w-4 h-4 text-blue-600" />
                   Firebase Firestore Cloud
-                </h3>
+                </h2>
                 <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 ${
                   isFirebaseConnected
                     ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
@@ -367,10 +368,10 @@ export const AdminSettingsPage: React.FC = () => {
 
             {/* Database Backups & Export */}
             <div className="p-6 bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-zinc-800 space-y-4">
-              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
+              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
                 <Database className="w-4 h-4" />
                 Database Backups & Export
-              </h3>
+              </h2>
               <p className="text-xs text-zinc-500 leading-relaxed">
                 Export full publication database containing {posts.length} articles, {categories.length} categories, and {authors.length} authors into an open JSON schema.
               </p>
@@ -389,10 +390,10 @@ export const AdminSettingsPage: React.FC = () => {
             {/* Master Passkey & Security Hardening */}
             <div className="p-6 bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-zinc-800 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
+                <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
                   <Shield className="w-4 h-4 text-emerald-600" />
                   CMS Security & Master Passkey
-                </h3>
+                </h2>
                 <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
                   HARDENED
                 </span>
