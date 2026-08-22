@@ -330,10 +330,10 @@ export async function handleRequest(req: Request): Promise<Response> {
 
     if (isEditing && existingPost) {
       await updatePost(existingPost.id, postPayload);
-      setToastMessage(`Article successfully updated (Last modified: ${new Date(nowIso).toLocaleTimeString()}) as ${targetStatus.toUpperCase()} in Firestore!`);
+      setToastMessage(`Article successfully updated (Last modified: ${new Date(nowIso).toLocaleTimeString()}) as ${targetStatus.toUpperCase()} in Firestore! /sitemap.xml automatically refreshed.`);
     } else {
       const created = await createPost(postPayload);
-      setToastMessage(`Article successfully created as ${targetStatus.toUpperCase()} in Firestore!`);
+      setToastMessage(`Article successfully created as ${targetStatus.toUpperCase()} in Firestore! /sitemap.xml automatically updated.`);
       navigate(`/admin/posts/${created.id}/edit`);
     }
 

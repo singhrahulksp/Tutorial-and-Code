@@ -126,7 +126,7 @@ export const DynamicSitemapGenerator: React.FC<DynamicSitemapGeneratorProps> = (
               Dynamic XML Sitemap Engine
             </h1>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-2xl">
-              Crawls all published technical articles, category taxonomies, and author credentials directly from Firestore. Generates an indexable XML document complying with the Sitemaps.org 0.9 and Google News standards.
+              Crawls all published technical articles, category taxonomies, and author credentials directly from Firestore. Automatically regenerates and updates the sitemap whenever a new blog is published, ensuring zero manual maintenance.
             </p>
           </div>
 

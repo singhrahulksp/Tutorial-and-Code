@@ -9,6 +9,8 @@ Allow: /author/
 Allow: /latest
 Allow: /about
 Allow: /contact
+Allow: /sitemap
+Allow: /sitemap.xml
 Allow: /legal
 Allow: /assets/
 Disallow: /admin
@@ -17,6 +19,14 @@ Disallow: /admin/*
 Disallow: /api/
 
 # Explicit AI Search & Knowledge Engine Indexing Permissions
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin/
+
 User-agent: GPTBot
 Allow: /
 Disallow: /admin/
@@ -45,3 +55,4 @@ Disallow: /admin/
 
 # Dynamic & Static Sitemap Locations
 Sitemap: https://www.tutorialsandcode.in/sitemap.xml
+Host: https://www.tutorialsandcode.in

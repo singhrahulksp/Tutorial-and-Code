@@ -3,7 +3,7 @@
         xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 
-  <!-- Core Pages -->
+  <!-- Core Static Pages -->
   <url>
     <loc>https://www.tutorialsandcode.in/</loc>
     <lastmod>2026-08-20</lastmod>
@@ -33,6 +33,18 @@
     <lastmod>2026-08-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.tutorialsandcode.in/privacy</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://www.tutorialsandcode.in/terms</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
 
   <!-- Topical Category Hubs -->
@@ -78,25 +90,25 @@
     <loc>https://www.tutorialsandcode.in/author/elena-vance</loc>
     <lastmod>2026-08-18</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.70</priority>
   </url>
   <url>
     <loc>https://www.tutorialsandcode.in/author/marcus-thorne</loc>
     <lastmod>2026-08-15</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.70</priority>
   </url>
   <url>
     <loc>https://www.tutorialsandcode.in/author/aria-chen</loc>
     <lastmod>2026-08-13</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.70</priority>
   </url>
   <url>
     <loc>https://www.tutorialsandcode.in/author/julian-sterling</loc>
     <lastmod>2026-08-10</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.70</priority>
   </url>
 
   <!-- Published Technical Articles -->
@@ -105,35 +117,119 @@
     <lastmod>2026-08-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.95</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&amp;fit=crop&amp;w=1400&amp;q=80</image:loc>
+      <image:title>Demystifying Advanced RAG: Hybrid Search, Reranking, and Graph-Augmented Retrieval</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.tutorialsandcode.in/blog/why-rust-is-standard-for-cloud-backends</loc>
     <lastmod>2026-08-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.90</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&amp;fit=crop&amp;w=1400&amp;q=80</image:loc>
+      <image:title>Why Rust Is Becoming the Standard for Cloud Backends</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.tutorialsandcode.in/blog/zero-trust-architecture-identity-beyond-perimeter</loc>
     <lastmod>2026-08-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.90</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&amp;fit=crop&amp;w=1400&amp;q=80</image:loc>
+      <image:title>Zero Trust Architecture: Implementing Micro-Segmentation &amp; Identity verification</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.tutorialsandcode.in/blog/next-gen-web-performance-islands-architecture</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.90</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&amp;fit=crop&amp;w=1400&amp;q=80</image:loc>
+      <image:title>Next-Gen Web Performance: Islands Architecture &amp; Partial Hydration</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.tutorialsandcode.in/blog/distributed-workflows-temporal-event-driven</loc>
     <lastmod>2026-08-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.90</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&amp;fit=crop&amp;w=1400&amp;q=80</image:loc>
+      <image:title>Designing Resilient Distributed Workflows with Temporal</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.tutorialsandcode.in/blog/state-of-ai-agents-autonomous-architectures</loc>
     <lastmod>2026-08-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.90</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&amp;fit=crop&amp;w=1400&amp;q=80</image:loc>
+      <image:title>The State of AI Agents: From Reactive Tools to Autonomous Systems</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.tutorialsandcode.in/blog/ebpf-observability-linux-kernel-tracing</loc>
+    <lastmod>2026-08-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&amp;fit=crop&amp;w=1400&amp;q=80</image:loc>
+      <image:title>Kernel-Level Observability with eBPF: Tracing Without Instrumentation</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.tutorialsandcode.in/blog/database-internals-lsm-trees-vs-b-trees</loc>
+    <lastmod>2026-08-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&amp;fit=crop&amp;w=1400&amp;q=80</image:loc>
+      <image:title>Database Storage Engines: LSM Trees vs. B+ Trees In-Depth</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.tutorialsandcode.in/blog/modern-css-subgrid-container-queries-view-transitions</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&amp;fit=crop&amp;w=1400&amp;q=80</image:loc>
+      <image:title>Mastering Modern CSS: Subgrid, Container Queries, and Native View Transitions</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.tutorialsandcode.in/blog/quantum-computing-post-quantum-cryptography</loc>
+    <lastmod>2026-07-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&amp;fit=crop&amp;w=1400&amp;q=80</image:loc>
+      <image:title>Post-Quantum Cryptography: Preparing Production Systems for Q-Day</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.tutorialsandcode.in/blog/microfrontends-module-federation-enterprise</loc>
+    <lastmod>2026-07-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&amp;fit=crop&amp;w=1400&amp;q=80</image:loc>
+      <image:title>Microfrontends with Webpack Module Federation in High-Velocity Teams</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.tutorialsandcode.in/blog/vector-databases-hnsw-vs-ivf-pgvector</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&amp;fit=crop&amp;w=1400&amp;q=80</image:loc>
+      <image:title>Vector Search Indexing Benchmarks: HNSW vs. IVF-Flat with pgvector</image:title>
+    </image:image>
   </url>
 </urlset>
