@@ -200,14 +200,14 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({ slug }) => {
         </p>
 
         {/* Meta Bar with Semantic Dates and Author */}
-        <div className="mt-6 pt-4 border-t border-zinc-100 dark:border-zinc-800 flex flex-wrap items-center justify-between gap-4">
+        <div className="mt-6 pt-4 border-t border-zinc-100 dark:border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             {author && (
               <button
                 onClick={() => navigate(`/author/${author.slug}`)}
                 className="flex items-center gap-2 group text-left"
               >
-                <div className="w-9 h-9 overflow-hidden bg-zinc-100 dark:bg-zinc-850">
+                <div className="w-9 h-9 overflow-hidden bg-zinc-100 dark:bg-zinc-850 border border-zinc-200 dark:border-zinc-800">
                   <img
                     src={author.avatar}
                     alt={`${author.name} portrait`}
@@ -227,32 +227,20 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({ slug }) => {
             )}
           </div>
 
+          {/* Structured Metadata block */}
           <div className="flex flex-wrap items-center gap-3 text-[11px] font-bold uppercase tracking-widest text-zinc-400">
-            <span className="inline-flex items-center gap-1">
-              <Calendar className="w-3 h-3 text-zinc-400" />
-              Published:{' '}
-              <time dateTime={post.publishedAt} className="text-zinc-700 dark:text-zinc-300 font-semibold">
+            <span className="inline-flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-zinc-400" />
+              <span>Published</span>
+              <time dateTime={post.publishedAt} className="text-neutral-900 dark:text-zinc-200">
                 {formattedPublishedDate}
               </time>
             </span>
 
-            {formattedUpdatedDate && (
-              <>
-                <span>•</span>
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800/80 text-blue-700 dark:text-blue-300 font-bold">
-                  <RefreshCw className="w-3 h-3 text-blue-500" />
-                  Last Updated:{' '}
-                  <time dateTime={post.updatedAt} className="text-blue-800 dark:text-blue-200 font-mono">
-                    {formattedUpdatedDate}
-                  </time>
-                </span>
-              </>
-            )}
-
             <span>•</span>
-            <span className="inline-flex items-center gap-1">
-              <Clock className="w-3 h-3 text-zinc-400" />
-              {post.readingTime} Min Read
+            <span className="inline-flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-zinc-400" />
+              <span>{post.readingTime} Min Read</span>
             </span>
 
             {post.views !== undefined && post.views > 0 && (
