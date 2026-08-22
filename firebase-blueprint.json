@@ -57,7 +57,8 @@
         "siteName": { "type": "string", "required": true },
         "tagline": { "type": "string", "required": true },
         "description": { "type": "string", "required": true },
-        "siteUrl": { "type": "string", "required": true }
+        "siteUrl": { "type": "string", "required": true },
+        "faviconUrl": { "type": "string" }
       }
     }
   }

@@ -21,6 +21,14 @@ export const FeaturedCard: React.FC<FeaturedCardProps> = ({ post, secondaryPosts
     year: 'numeric',
   });
 
+  const formattedUpdatedDate = post.updatedAt
+    ? new Date(post.updatedAt).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    : null;
+
   return (
     <section className="grid grid-cols-1 lg:grid-cols-12 gap-0 border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-[#0a0a0a] overflow-hidden mb-12">
       
@@ -50,12 +58,18 @@ export const FeaturedCard: React.FC<FeaturedCardProps> = ({ post, secondaryPosts
             {post.description}
           </p>
 
-          <div className="flex items-center gap-4 text-[11px] font-bold uppercase tracking-widest text-zinc-400">
+          <div className="flex flex-wrap items-center gap-3 text-[11px] font-bold uppercase tracking-widest text-zinc-400">
             <span>{author?.name || 'Staff Researcher'}</span>
             <span className="w-1 h-1 bg-zinc-500 rounded-full"></span>
             <span>{post.readingTime} Min Read</span>
             <span className="w-1 h-1 bg-zinc-500 rounded-full"></span>
             <span>{formattedDate}</span>
+            {formattedUpdatedDate && (
+              <>
+                <span className="w-1 h-1 bg-zinc-500 rounded-full"></span>
+                <span className="text-blue-400 font-semibold">Updated {formattedUpdatedDate}</span>
+              </>
+            )}
           </div>
         </div>
       </div>

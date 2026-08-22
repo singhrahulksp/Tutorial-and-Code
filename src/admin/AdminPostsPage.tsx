@@ -132,7 +132,7 @@ export const AdminPostsPage: React.FC = () => {
                 <th className="px-4 py-3.5 font-medium uppercase tracking-wider">Author</th>
                 <th className="px-4 py-3.5 font-medium uppercase tracking-wider">Status</th>
                 <th className="px-4 py-3.5 font-medium uppercase tracking-wider">Views</th>
-                <th className="px-4 py-3.5 font-medium uppercase tracking-wider">Published</th>
+                <th className="px-4 py-3.5 font-medium uppercase tracking-wider">Published / Updated</th>
                 <th className="px-6 py-3.5 font-medium uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
@@ -190,11 +190,25 @@ export const AdminPostsPage: React.FC = () => {
                     </td>
 
                     <td className="px-4 py-4 whitespace-nowrap font-mono text-neutral-500">
-                      {new Date(post.publishedAt).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
+                      <div>
+                        {new Date(post.publishedAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </div>
+                      {post.updatedAt && (
+                        <div className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold flex items-center gap-1 mt-0.5">
+                          <span>Updated:</span>
+                          <span>
+                            {new Date(post.updatedAt).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            })}
+                          </span>
+                        </div>
+                      )}
                     </td>
 
                     <td className="px-6 py-4 text-right whitespace-nowrap space-x-1.5">

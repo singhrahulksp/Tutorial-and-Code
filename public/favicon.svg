@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <rect width="64" height="64" rx="14" fill="#09090b" />
+  <rect x="1" y="1" width="62" height="62" rx="13" stroke="#27272a" stroke-width="2" />
+  
+  <!-- Subtle Gradient Accent -->
+  <defs>
+    <linearGradient id="tc-grad" x1="12" y1="12" x2="52" y2="52" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3b82f6" />
+      <stop offset="0.5" stop-color="#2563eb" />
+      <stop offset="1" stop-color="#60a5fa" />
+    </linearGradient>
+    <linearGradient id="tc-glow" x1="20" y1="16" x2="44" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#38bdf8" />
+      <stop offset="1" stop-color="#3b82f6" />
+    </linearGradient>
+  </defs>
+
+  <!-- Code Bracket Left < -->
+  <path d="M22 23L13 32L22 41" stroke="url(#tc-glow)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Code Slash / -->
+  <path d="M28 43L36 21" stroke="#a1a1aa" stroke-width="4" stroke-linecap="round" />
+
+  <!-- Code Bracket Right > -->
+  <path d="M42 23L51 32L42 41" stroke="url(#tc-glow)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Pulse Status Dot -->
+  <circle cx="50" cy="14" r="3.5" fill="#10b981" />
+</svg>

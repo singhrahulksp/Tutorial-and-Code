@@ -108,6 +108,7 @@ const DEFAULT_SETTINGS: SiteSettings = {
   tagline: 'Engineering Tutorials, Clean Architectures & Code Deep Dives',
   description: 'In-depth programming tutorials, clean code architectures, AI systems, and software engineering analysis for builders.',
   siteUrl: 'https://www.tutorialsandcode.in',
+  faviconUrl: '/favicon.svg',
   postsPerPage: 9,
   enableNewsletter: true,
   enableTrending: true,
@@ -443,6 +444,33 @@ export function BlogProvider({ children }: { children: React.ReactNode }) {
       if (unsubscribeSettings) unsubscribeSettings();
     };
   }, []);
+
+  // Synchronize dynamic favicon to document head
+  useEffect(() => {
+    const favicon = siteSettings?.faviconUrl?.trim() || '/favicon.svg';
+    let linkIcon = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
+    if (!linkIcon) {
+      linkIcon = document.createElement('link');
+      linkIcon.rel = 'icon';
+      document.head.appendChild(linkIcon);
+    }
+    linkIcon.href = favicon;
+    if (favicon.endsWith('.svg') || favicon.startsWith('data:image/svg')) {
+      linkIcon.type = 'image/svg+xml';
+    } else if (favicon.endsWith('.png') || favicon.startsWith('data:image/png')) {
+      linkIcon.type = 'image/png';
+    } else if (favicon.endsWith('.ico') || favicon.startsWith('data:image/x-icon') || favicon.startsWith('data:image/vnd.microsoft.icon')) {
+      linkIcon.type = 'image/x-icon';
+    }
+
+    let linkApple = document.querySelector('link[rel="apple-touch-icon"]') as HTMLLinkElement | null;
+    if (!linkApple) {
+      linkApple = document.createElement('link');
+      linkApple.rel = 'apple-touch-icon';
+      document.head.appendChild(linkApple);
+    }
+    linkApple.href = favicon;
+  }, [siteSettings?.faviconUrl]);
 
   // Published posts sorted by date
   const publishedPosts = useMemo(() => {

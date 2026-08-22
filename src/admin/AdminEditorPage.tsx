@@ -33,6 +33,7 @@ import {
   Trash2,
   ArrowUp,
   ArrowDown,
+  RefreshCw,
 } from 'lucide-react';
 
 const PRESET_IMAGES = [
@@ -304,6 +305,7 @@ export async function handleRequest(req: Request): Promise<Response> {
       .map((f) => ({ question: f.question.trim(), answer: f.answer.trim() }))
       .filter((f) => f.question.length > 0 && f.answer.length > 0);
 
+    const nowIso = new Date().toISOString();
     const postPayload = {
       title,
       slug: slug.trim() || title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-'),
@@ -313,7 +315,8 @@ export async function handleRequest(req: Request): Promise<Response> {
       tags: tagsArray.length > 0 ? tagsArray : ['Tech'],
       authorId,
       featuredImage,
-      publishedAt: existingPost?.publishedAt || new Date().toISOString(),
+      publishedAt: existingPost?.publishedAt || nowIso,
+      updatedAt: isEditing ? nowIso : existingPost?.updatedAt,
       readingTime: calculatedReadingTime,
       status: targetStatus,
       featured,
@@ -327,7 +330,7 @@ export async function handleRequest(req: Request): Promise<Response> {
 
     if (isEditing && existingPost) {
       await updatePost(existingPost.id, postPayload);
-      setToastMessage(`Article successfully updated as ${targetStatus.toUpperCase()} in Firestore!`);
+      setToastMessage(`Article successfully updated (Last modified: ${new Date(nowIso).toLocaleTimeString()}) as ${targetStatus.toUpperCase()} in Firestore!`);
     } else {
       const created = await createPost(postPayload);
       setToastMessage(`Article successfully created as ${targetStatus.toUpperCase()} in Firestore!`);
@@ -369,6 +372,33 @@ export async function handleRequest(req: Request): Promise<Response> {
         <div className="mb-6 p-4 border border-blue-600 bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-100 text-xs font-bold flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
           <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Revision Meta Bar for Existing Posts */}
+      {isEditing && existingPost && (
+        <div className="mb-6 p-3.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2 font-mono text-zinc-600 dark:text-zinc-300">
+            <span className="font-bold text-neutral-900 dark:text-white uppercase tracking-wider text-[11px]">
+              Article Lifecycle:
+            </span>
+            <span>
+              Published: {new Date(existingPost.publishedAt).toLocaleString()}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 font-mono">
+            {existingPost.updatedAt ? (
+              <span className="text-blue-600 dark:text-blue-400 font-semibold flex items-center gap-1">
+                <RefreshCw className="w-3 h-3" />
+                Last Updated: {new Date(existingPost.updatedAt).toLocaleString()}
+              </span>
+            ) : (
+              <span className="text-zinc-400">
+                No revisions yet (Original publication)
+              </span>
+            )}
+          </div>
         </div>
       )}
 

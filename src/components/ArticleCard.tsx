@@ -26,6 +26,14 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
     year: 'numeric',
   });
 
+  const formattedUpdatedDate = post.updatedAt
+    ? new Date(post.updatedAt).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    : null;
+
   if (variant === 'compact') {
     return (
       <article
@@ -47,8 +55,14 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
           <HeadingTag className="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
             {post.title}
           </HeadingTag>
-          <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider mt-1">
-            {post.readingTime} min • {formattedDate}
+          <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider mt-1 flex items-center gap-1.5 flex-wrap">
+            <span>{post.readingTime} min</span>
+            <span>•</span>
+            {formattedUpdatedDate ? (
+              <span className="text-blue-600 dark:text-blue-400 font-semibold">Updated {formattedUpdatedDate}</span>
+            ) : (
+              <span>{formattedDate}</span>
+            )}
           </div>
         </div>
       </article>
@@ -81,12 +95,18 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
             {post.description}
           </p>
 
-          <div className="pt-2 flex items-center gap-3 text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
+          <div className="pt-2 flex flex-wrap items-center gap-3 text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
             <span>{author?.name || 'Staff'}</span>
             <span>•</span>
             <span>{post.readingTime} min read</span>
             <span>•</span>
             <span>{formattedDate}</span>
+            {formattedUpdatedDate && (
+              <>
+                <span>•</span>
+                <span className="text-blue-600 dark:text-blue-400 font-semibold">Updated {formattedUpdatedDate}</span>
+              </>
+            )}
           </div>
         </div>
       </article>
@@ -121,10 +141,16 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
           {post.description}
         </p>
 
-        <div className="mt-auto pt-2 flex items-center gap-2 text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
+        <div className="mt-auto pt-2 flex flex-wrap items-center gap-2 text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
           <span>{author?.name || 'Staff'}</span>
           <span>•</span>
           <span>{post.readingTime} min</span>
+          {formattedUpdatedDate && (
+            <>
+              <span>•</span>
+              <span className="text-blue-600 dark:text-blue-400 font-semibold">Updated {formattedUpdatedDate}</span>
+            </>
+          )}
         </div>
       </div>
     </article>

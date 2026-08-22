@@ -84,6 +84,7 @@ export interface SiteSettings {
   tagline: string;
   description: string;
   siteUrl: string;
+  faviconUrl?: string;
   postsPerPage: number;
   enableNewsletter: boolean;
   enableTrending: boolean;

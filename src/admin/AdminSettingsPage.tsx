@@ -3,6 +3,7 @@ import { useBlog } from '../context/BlogContext';
 import { useRouter } from '../router/RouterContext';
 import { AdminLayout } from './AdminLayout';
 import { AdminSEOManager } from './AdminSEOManager';
+import { FaviconManager } from '../components/FaviconManager';
 import { computeHash, resetFailedLoginAttempts } from '../utils/security';
 import {
   Download,
@@ -19,6 +20,8 @@ import {
   ExternalLink,
   Search,
   Settings,
+  Sparkles,
+  Layers,
 } from 'lucide-react';
 
 export const AdminSettingsPage: React.FC = () => {
@@ -36,7 +39,7 @@ export const AdminSettingsPage: React.FC = () => {
   } = useBlog();
 
   const isSeoRoute = currentPath === '/admin/seo';
-  const [activeTab, setActiveTab] = useState<'seo' | 'general' | 'database'>(isSeoRoute ? 'seo' : 'seo');
+  const [activeTab, setActiveTab] = useState<'seo' | 'general' | 'favicon' | 'database'>(isSeoRoute ? 'seo' : 'seo');
 
   useEffect(() => {
     if (currentPath === '/admin/seo') {
@@ -48,6 +51,7 @@ export const AdminSettingsPage: React.FC = () => {
   const [tagline, setTagline] = useState(siteSettings?.tagline || '');
   const [description, setDescription] = useState(siteSettings?.description || '');
   const [siteUrl, setSiteUrl] = useState(siteSettings?.siteUrl || '');
+  const [faviconUrl, setFaviconUrl] = useState(siteSettings?.faviconUrl || '/favicon.svg');
   const [toast, setToast] = useState<string | null>(null);
 
   // Security passkey state
@@ -63,6 +67,7 @@ export const AdminSettingsPage: React.FC = () => {
       setTagline(siteSettings.tagline || '');
       setDescription(siteSettings.description || '');
       setSiteUrl(siteSettings.siteUrl || '');
+      setFaviconUrl(siteSettings.faviconUrl || '/favicon.svg');
     }
   }, [siteSettings]);
 
@@ -73,8 +78,18 @@ export const AdminSettingsPage: React.FC = () => {
       tagline,
       description,
       siteUrl,
+      faviconUrl,
     });
-    setToast('Site settings updated and synced to Firestore successfully!');
+    setToast('Site settings & favicon updated and synced to Firestore successfully!');
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleFaviconUpdate = async (newFavicon: string) => {
+    setFaviconUrl(newFavicon);
+    await updateSiteSettings({
+      faviconUrl: newFavicon,
+    });
+    setToast('Favicon updated and synced to Firestore successfully!');
     setTimeout(() => setToast(null), 3000);
   };
 
@@ -188,6 +203,18 @@ export const AdminSettingsPage: React.FC = () => {
         </button>
 
         <button
+          onClick={() => setActiveTab('favicon')}
+          className={`px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 whitespace-nowrap ${
+            activeTab === 'favicon'
+              ? 'bg-black text-white dark:bg-white dark:text-black shadow-xs'
+              : 'bg-zinc-100 dark:bg-zinc-850 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
+          }`}
+        >
+          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+          <span>Publication Favicon & Icons</span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('database')}
           className={`px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 whitespace-nowrap ${
             activeTab === 'database'
@@ -209,112 +236,132 @@ export const AdminSettingsPage: React.FC = () => {
 
       {/* TAB 2: General Settings & Audience */}
       {activeTab === 'general' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
-          {/* Left: General Settings */}
-          <div className="lg:col-span-7 space-y-8">
-            <div className="p-6 bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-zinc-800">
-              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-6 flex items-center gap-2">
-                <Globe className="w-4 h-4" />
-                Global Publication Configuration
-              </h3>
+        <div className="space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            {/* Left: General Settings */}
+            <div className="lg:col-span-7 space-y-8">
+              <div className="p-6 bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-zinc-800">
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-6 flex items-center gap-2">
+                  <Globe className="w-4 h-4" />
+                  Global Publication Configuration
+                </h3>
 
-              <form onSubmit={handleSaveSettings} className="space-y-4">
-                <div>
-                  <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-1.5">
-                    Publication Name
-                  </label>
-                  <input
-                    type="text"
-                    value={siteName}
-                    onChange={(e) => setSiteName(e.target.value)}
-                    className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white outline-none focus:border-black dark:focus:border-white"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-1.5">
-                    Editorial Tagline
-                  </label>
-                  <input
-                    type="text"
-                    value={tagline}
-                    onChange={(e) => setTagline(e.target.value)}
-                    className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white outline-none focus:border-black dark:focus:border-white"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-1.5">
-                    Global Fallback Meta Description (SEO)
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white outline-none focus:border-black dark:focus:border-white resize-none"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-1.5">
-                    Base Production Canonical Domain
-                  </label>
-                  <input
-                    type="url"
-                    value={siteUrl}
-                    onChange={(e) => setSiteUrl(e.target.value)}
-                    className="w-full px-3 py-2 text-xs font-mono border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white outline-none focus:border-black dark:focus:border-white"
-                    required
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="px-6 py-2.5 text-xs font-bold uppercase tracking-widest bg-black text-white dark:bg-white dark:text-black hover:opacity-90 transition-opacity"
-                >
-                  Save & Sync Settings
-                </button>
-              </form>
-            </div>
-          </div>
-
-          {/* Right: Newsletter Subscribers */}
-          <div className="lg:col-span-5 space-y-8">
-            <div className="p-6 bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-zinc-800">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
-                    <Mail className="w-4 h-4" />
-                    Newsletter Subscribers ({subscribers.length})
-                  </h3>
-                  <p className="text-[11px] text-zinc-500 mt-0.5">Opt-in readership synced with cloud storage</p>
-                </div>
-
-                <button
-                  onClick={handleExportSubscribersCSV}
-                  className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-1.5"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Export CSV</span>
-                </button>
-              </div>
-
-              <div className="max-h-64 overflow-y-auto divide-y divide-zinc-100 dark:divide-zinc-800 text-xs font-mono">
-                {subscribers.map((sub) => (
-                  <div key={sub.id} className="py-2 flex items-center justify-between">
-                    <span className="text-neutral-800 dark:text-neutral-200">{sub.email}</span>
-                    <span className="text-zinc-400 text-[10px]">
-                      {new Date(sub.subscribedAt).toLocaleDateString()}
-                    </span>
+                <form onSubmit={handleSaveSettings} className="space-y-4">
+                  <div>
+                    <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-1.5">
+                      Publication Name
+                    </label>
+                    <input
+                      type="text"
+                      value={siteName}
+                      onChange={(e) => setSiteName(e.target.value)}
+                      className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white outline-none focus:border-black dark:focus:border-white"
+                      required
+                    />
                   </div>
-                ))}
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-1.5">
+                      Editorial Tagline
+                    </label>
+                    <input
+                      type="text"
+                      value={tagline}
+                      onChange={(e) => setTagline(e.target.value)}
+                      className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white outline-none focus:border-black dark:focus:border-white"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-1.5">
+                      Global Fallback Meta Description (SEO)
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white outline-none focus:border-black dark:focus:border-white resize-none"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-1.5">
+                      Base Production Canonical Domain
+                    </label>
+                    <input
+                      type="url"
+                      value={siteUrl}
+                      onChange={(e) => setSiteUrl(e.target.value)}
+                      className="w-full px-3 py-2 text-xs font-mono border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white outline-none focus:border-black dark:focus:border-white"
+                      required
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="px-6 py-2.5 text-xs font-bold uppercase tracking-widest bg-black text-white dark:bg-white dark:text-black hover:opacity-90 transition-opacity"
+                  >
+                    Save & Sync Settings
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {/* Right: Newsletter Subscribers */}
+            <div className="lg:col-span-5 space-y-8">
+              <div className="p-6 bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-zinc-800">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
+                      <Mail className="w-4 h-4" />
+                      Newsletter Subscribers ({subscribers.length})
+                    </h3>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">Opt-in readership synced with cloud storage</p>
+                  </div>
+
+                  <button
+                    onClick={handleExportSubscribersCSV}
+                    className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-1.5"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Export CSV</span>
+                  </button>
+                </div>
+
+                <div className="max-h-64 overflow-y-auto divide-y divide-zinc-100 dark:divide-zinc-800 text-xs font-mono">
+                  {subscribers.map((sub) => (
+                    <div key={sub.id} className="py-2 flex items-center justify-between">
+                      <span className="text-neutral-800 dark:text-neutral-200">{sub.email}</span>
+                      <span className="text-zinc-400 text-[10px]">
+                        {new Date(sub.subscribedAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
+
+          {/* Favicon & Branding Manager Section */}
+          <FaviconManager
+            currentFaviconUrl={faviconUrl}
+            siteName={siteName}
+            onFaviconChange={handleFaviconUpdate}
+          />
+        </div>
+      )}
+
+      {/* TAB 3: Dedicated Favicon & Icons View */}
+      {activeTab === 'favicon' && (
+        <div className="space-y-6">
+          <FaviconManager
+            currentFaviconUrl={faviconUrl}
+            siteName={siteName}
+            onFaviconChange={handleFaviconUpdate}
+          />
         </div>
       )}
 
