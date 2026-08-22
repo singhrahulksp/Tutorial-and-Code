@@ -1,39 +1,35 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useBlog } from '../context/BlogContext';
 import { useRouter } from '../router/RouterContext';
 import { AdminLayout } from './AdminLayout';
-import { MarkdownRenderer } from '../components/MarkdownRenderer';
+import { ArticleBlocksRenderer } from '../components/ArticleBlocksRenderer';
 import { LocalImageUploader } from '../components/LocalImageUploader';
-import { processLocalImageFile } from '../utils/imageUtils';
-import { PostFAQ } from '../types';
+import { BlockBasedEditor } from './components/BlockBasedEditor';
+import { PostFAQ, ArticleBlock } from '../types';
+import {
+  parseMarkdownToBlocks,
+  serializeBlocksToMarkdown,
+  calculateBlocksStats,
+  createBlock,
+} from '../utils/blockUtils';
 import {
   Save,
   Send,
   Eye,
   Edit3,
   Sparkles,
-  Link as LinkIcon,
-  Image as ImageIcon,
-  Code,
-  List,
-  Quote,
-  Table,
-  Heading,
-  Heading2,
-  Heading3,
-  Heading4,
-  Heading5,
   ArrowLeft,
   CheckCircle2,
-  Upload,
-  ChevronDown,
-  Type,
   HelpCircle,
   Plus,
   Trash2,
   ArrowUp,
   ArrowDown,
   RefreshCw,
+  Columns,
+  Layers,
+  Calendar,
+  Clock,
 } from 'lucide-react';
 
 const PRESET_IMAGES = [
@@ -55,7 +51,7 @@ export const AdminEditorPage: React.FC = () => {
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [description, setDescription] = useState('');
-  const [content, setContent] = useState('');
+  const [blocks, setBlocks] = useState<ArticleBlock[]>([]);
   const [category, setCategory] = useState('ai');
   const [tagsInput, setTagsInput] = useState('');
   const [authorId, setAuthorId] = useState('auth-1');
@@ -68,32 +64,24 @@ export const AdminEditorPage: React.FC = () => {
   const [faqs, setFaqs] = useState<PostFAQ[]>([]);
   const [activeTab, setActiveTab] = useState<'write' | 'preview' | 'split'>('write');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [isInsertingLocalImage, setIsInsertingLocalImage] = useState(false);
-  const [headingMenuOpen, setHeadingMenuOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const markdownImageInputRef = useRef<HTMLInputElement | null>(null);
-  const headingDropdownRef = useRef<HTMLDivElement | null>(null);
-
-  // Close heading dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (headingDropdownRef.current && !headingDropdownRef.current.contains(e.target as Node)) {
-        setHeadingMenuOpen(false);
-      }
-    };
-    if (headingMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [headingMenuOpen]);
-
-  // Initialize data if editing
+  // Initialize data if editing or load default blocks for new article
   useEffect(() => {
     if (existingPost) {
       setTitle(existingPost.title || '');
       setSlug(existingPost.slug || '');
       setDescription(existingPost.description || '');
-      setContent(existingPost.content || '');
+      
+      // Load blocks or convert legacy markdown content
+      if (existingPost.blocks && existingPost.blocks.length > 0) {
+        setBlocks(existingPost.blocks);
+      } else if (existingPost.content) {
+        setBlocks(parseMarkdownToBlocks(existingPost.content));
+      } else {
+        setBlocks([createBlock('text', { content: '' })]);
+      }
+
       setCategory(existingPost.category || 'ai');
       setTagsInput(Array.isArray(existingPost.tags) ? existingPost.tags.join(', ') : '');
       setAuthorId(existingPost.authorId || 'auth-1');
@@ -106,155 +94,15 @@ export const AdminEditorPage: React.FC = () => {
       setFaqs(Array.isArray(existingPost.faq) ? existingPost.faq : []);
     } else {
       setFaqs([]);
-      // Default template for new post
-      setContent(`### Executive Summary
-
-Provide a high-level architectural overview of the system, problem statement, and engineering benchmarks.
-
----
-
-### Core Engineering Analysis
-
-Explain the internal mechanics, memory profiles, or protocol interactions.
-
-\`\`\`typescript
-// Sample production code implementation
-export async function handleRequest(req: Request): Promise<Response> {
-  const data = await req.json();
-  return Response.json({ status: "processed", payload: data });
-}
-\`\`\`
-
----
-
-### Key Benchmark Results
-
-| Metric | Baseline | Optimized Architecture |
-| :--- | :--- | :--- |
-| **p99 Latency** | 45ms | 2.4ms |
-| **Memory RSS** | 512MB | 38MB |
-
----
-
-### Architectural Takeaways
-
-- Implement zero-allocation buffers
-- Enforce strict JSON schema validation
-- Decouple stateful persistence from transient compute`);
+      // Initialize new article with a single clean Text / Rich Text component
+      setBlocks([createBlock('text', { content: '' })]);
     }
   }, [existingPost]);
 
-  // Word count & Reading time
-  const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
-  const calculatedReadingTime = Math.max(1, Math.ceil(wordCount / 200));
-
-  // Quick Markdown Insert Toolbar Helper
-  const insertMarkdown = (prefix: string, suffix: string = '') => {
-    const textarea = document.getElementById('editor-textarea') as HTMLTextAreaElement | null;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selected = content.substring(start, end) || 'text';
-    const replacement = `${prefix}${selected}${suffix}`;
-
-    const newContent = content.substring(0, start) + replacement + content.substring(end);
-    setContent(newContent);
-
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start + prefix.length, start + prefix.length + selected.length);
-    }, 50);
-  };
-
-  // Dedicated Smart Heading Formatting (H2, H3, H4, H5)
-  const applyHeading = (level: 2 | 3 | 4 | 5) => {
-    const textarea = document.getElementById('editor-textarea') as HTMLTextAreaElement | null;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const prefix = '#'.repeat(level) + ' ';
-
-    if (start === end) {
-      // Single line / cursor position
-      const textBefore = content.substring(0, start);
-      const textAfter = content.substring(start);
-      const lastNewline = textBefore.lastIndexOf('\n');
-      const nextNewline = textAfter.indexOf('\n');
-
-      const lineStart = lastNewline === -1 ? 0 : lastNewline + 1;
-      const lineEnd = nextNewline === -1 ? content.length : start + nextNewline;
-      const currentLine = content.substring(lineStart, lineEnd);
-
-      // Check existing heading level
-      const currentHashMatch = currentLine.match(/^(#{1,6})\s+/);
-      const currentLevel = currentHashMatch ? currentHashMatch[1].length : 0;
-
-      let newLine: string;
-      if (currentLevel === level) {
-        // Toggle off back to normal paragraph text
-        newLine = currentLine.replace(/^#{1,6}\s+/, '');
-      } else {
-        const cleanedLine = currentLine.replace(/^#{1,6}\s+/, '');
-        newLine = cleanedLine.trim() ? `${prefix}${cleanedLine}` : `${prefix}Heading ${level}`;
-      }
-
-      const newContent = content.substring(0, lineStart) + newLine + content.substring(lineEnd);
-      setContent(newContent);
-
-      setTimeout(() => {
-        textarea.focus();
-        const newCursor = lineStart + newLine.length;
-        textarea.setSelectionRange(newCursor, newCursor);
-      }, 50);
-    } else {
-      // Multiple lines / highlighted selection
-      const selected = content.substring(start, end);
-      const lines = selected.split('\n');
-      const transformed = lines
-        .map((l) => {
-          const cleaned = l.replace(/^#{1,6}\s+/, '');
-          return `${prefix}${cleaned}`;
-        })
-        .join('\n');
-
-      const newContent = content.substring(0, start) + transformed + content.substring(end);
-      setContent(newContent);
-
-      setTimeout(() => {
-        textarea.focus();
-        textarea.setSelectionRange(start, start + transformed.length);
-      }, 50);
-    }
-  };
-
-  // Handle Local Device Image insertion directly into markdown text
-  const handleMarkdownLocalImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsInsertingLocalImage(true);
-    try {
-      const base64Image = await processLocalImageFile(file, 1200, 800, 0.85);
-      const textarea = document.getElementById('editor-textarea') as HTMLTextAreaElement | null;
-      const start = textarea ? textarea.selectionStart : content.length;
-      const imageMarkdown = `\n\n![${file.name.replace(/\.[^/.]+$/, '')}](${base64Image})\n*Figure: Uploaded technical diagram*\n\n`;
-
-      const newContent = content.substring(0, start) + imageMarkdown + content.substring(start);
-      setContent(newContent);
-      setToastMessage('Local image added to Markdown content.');
-      setTimeout(() => setToastMessage(null), 3000);
-    } catch (err) {
-      console.error(err);
-      alert('Failed to insert local image.');
-    } finally {
-      setIsInsertingLocalImage(false);
-      if (markdownImageInputRef.current) {
-        markdownImageInputRef.current.value = '';
-      }
-    }
-  };
+  // Dynamic Metrics
+  const stats = calculateBlocksStats(blocks);
+  const currentAuthor = authors.find((a) => a.id === authorId) || authors[0];
+  const currentCategory = categories.find((c) => c.slug === category) || categories[0];
 
   // Manual FAQ Management Handlers
   const handleAddFaq = () => {
@@ -285,503 +133,335 @@ export async function handleRequest(req: Request): Promise<Response> {
     });
   };
 
+  // Save / Publish Action
   const handleSave = async (targetStatus: 'draft' | 'published') => {
-    if (!title.trim() || !content.trim()) {
-      alert('Please provide both an Article Title and Content.');
+    if (!title.trim()) {
+      alert('Please enter an Article Title.');
       return;
     }
 
-    const tagsArray = tagsInput
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean);
-
-    const keyTakeawaysArray = keyTakeawaysInput
-      .split('\n')
-      .map((t) => t.trim().replace(/^[-*•]\s*/, ''))
-      .filter(Boolean);
-
-    const cleanedFaqs = faqs
-      .map((f) => ({ question: f.question.trim(), answer: f.answer.trim() }))
-      .filter((f) => f.question.length > 0 && f.answer.length > 0);
-
-    const nowIso = new Date().toISOString();
-    const postPayload = {
-      title,
-      slug: slug.trim() || title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-'),
-      description: description.trim() || title,
-      content,
-      category,
-      tags: tagsArray.length > 0 ? tagsArray : ['Tech'],
-      authorId,
-      featuredImage,
-      publishedAt: existingPost?.publishedAt || nowIso,
-      updatedAt: isEditing ? nowIso : existingPost?.updatedAt,
-      readingTime: calculatedReadingTime,
-      status: targetStatus,
-      featured,
-      seoTitle: seoTitle.trim() || title,
-      seoDescription: seoDescription.trim() || description,
-      directAnswer: directAnswer.trim() || undefined,
-      keyTakeaways: keyTakeawaysArray.length > 0 ? keyTakeawaysArray : undefined,
-      faq: cleanedFaqs.length > 0 ? cleanedFaqs : undefined,
-      ogImage: featuredImage,
-    };
-
-    if (isEditing && existingPost) {
-      await updatePost(existingPost.id, postPayload);
-      setToastMessage(`Article successfully updated (Last modified: ${new Date(nowIso).toLocaleTimeString()}) as ${targetStatus.toUpperCase()} in Firestore!`);
-    } else {
-      const created = await createPost(postPayload);
-      setToastMessage(`Article successfully created as ${targetStatus.toUpperCase()} in Firestore!`);
-      navigate(`/admin/posts/${created.id}/edit`);
+    if (blocks.length === 0) {
+      alert('Please add at least one content component block.');
+      return;
     }
 
-    setTimeout(() => setToastMessage(null), 3500);
+    setIsSaving(true);
+
+    try {
+      const tagsArray = tagsInput
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean);
+
+      const keyTakeawaysArray = keyTakeawaysInput
+        .split('\n')
+        .map((t) => t.trim().replace(/^[-*•]\s*/, ''))
+        .filter(Boolean);
+
+      const cleanedFaqs = faqs
+        .map((f) => ({ question: f.question.trim(), answer: f.answer.trim() }))
+        .filter((f) => f.question.length > 0 && f.answer.length > 0);
+
+      // Serialize blocks to unified markdown for backward compatibility, RSS, and SEO
+      const serializedContent = serializeBlocksToMarkdown(blocks);
+
+      const nowIso = new Date().toISOString();
+      const generatedSlug =
+        slug.trim() ||
+        title
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, '')
+          .replace(/\s+/g, '-');
+
+      const postPayload = {
+        title: title.trim(),
+        slug: generatedSlug,
+        description: description.trim() || title.trim(),
+        content: serializedContent,
+        blocks: blocks,
+        category,
+        tags: tagsArray.length > 0 ? tagsArray : ['Tutorial'],
+        authorId,
+        featuredImage: featuredImage || PRESET_IMAGES[0].url,
+        publishedAt: existingPost?.publishedAt || nowIso,
+        updatedAt: isEditing ? nowIso : existingPost?.updatedAt,
+        readingTime: stats.readingTime,
+        status: targetStatus,
+        featured,
+        seoTitle: seoTitle.trim() || title.trim(),
+        seoDescription: seoDescription.trim() || description.trim(),
+        directAnswer: directAnswer.trim() || undefined,
+        keyTakeaways: keyTakeawaysArray.length > 0 ? keyTakeawaysArray : undefined,
+        faq: cleanedFaqs.length > 0 ? cleanedFaqs : undefined,
+        ogImage: featuredImage || PRESET_IMAGES[0].url,
+      };
+
+      if (isEditing && existingPost) {
+        await updatePost(existingPost.id, postPayload);
+        setToastMessage(
+          `Article successfully updated (${targetStatus.toUpperCase()}) with ${blocks.length} structured blocks!`
+        );
+      } else {
+        const created = await createPost(postPayload);
+        setToastMessage(`Article successfully published to Firestore!`);
+        navigate(`/admin/posts/${created.id}/edit`);
+      }
+    } catch (err) {
+      console.error('Save failed:', err);
+      alert('Failed to save article. Please try again.');
+    } finally {
+      setIsSaving(false);
+      setTimeout(() => setToastMessage(null), 4000);
+    }
   };
 
   return (
     <AdminLayout
-      title={isEditing ? 'Edit Publication' : 'Compose Technical Deep-Dive'}
-      subtitle={isEditing ? `Modifying /blog/${slug} (Synced to Firestore)` : 'Author high-precision Markdown with local image uploads and Firestore persistence.'}
+      title={isEditing ? 'Edit Publication (Block CMS)' : 'New Technical Article (Block CMS)'}
+      subtitle={
+        isEditing
+          ? `Modifying /blog/${slug || existingPost?.slug} with structured blocks`
+          : 'Compose modular articles with Text, Image, Code, and Quote components.'
+      }
       actionButton={
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate('/admin/posts')}
-            className="px-3 py-2 text-xs font-bold uppercase tracking-wider border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center gap-1.5"
+            className="px-3 py-2 text-xs font-bold uppercase tracking-wider border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center gap-1.5 rounded-lg"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Back
           </button>
           <button
+            disabled={isSaving}
             onClick={() => handleSave('draft')}
-            className="px-3.5 py-2 text-xs font-bold uppercase tracking-wider border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-850 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors flex items-center gap-1.5"
+            className="px-3.5 py-2 text-xs font-bold uppercase tracking-wider border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-850 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors flex items-center gap-1.5 rounded-lg disabled:opacity-50"
           >
             <Save className="w-3.5 h-3.5" /> Save Draft
           </button>
           <button
+            disabled={isSaving}
             onClick={() => handleSave('published')}
-            className="px-4 py-2 text-xs font-bold uppercase tracking-widest bg-black dark:bg-white text-white dark:text-black hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow-xs"
+            className="px-4 py-2 text-xs font-bold uppercase tracking-widest bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center gap-1.5 shadow-md rounded-lg disabled:opacity-50"
           >
-            <Send className="w-3.5 h-3.5" /> Publish to Firestore
+            <Send className="w-3.5 h-3.5" /> Publish to Live
           </button>
         </div>
       }
     >
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="mb-6 p-4 border border-blue-600 bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-100 text-xs font-bold flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
+        <div className="mb-6 p-4 border border-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-100 text-xs font-bold flex items-center gap-2 rounded-xl animate-in fade-in duration-150">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Revision Meta Bar for Existing Posts */}
       {isEditing && existingPost && (
-        <div className="mb-6 p-3.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="mb-6 p-3.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2 font-mono text-zinc-600 dark:text-zinc-300">
             <span className="font-bold text-neutral-900 dark:text-white uppercase tracking-wider text-[11px]">
-              Article Lifecycle:
+              Status:
             </span>
-            <span>
-              Published: {new Date(existingPost.publishedAt).toLocaleString()}
+            <span
+              className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                existingPost.status === 'published'
+                  ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
+                  : 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300'
+              }`}
+            >
+              {existingPost.status}
             </span>
+            <span>• Published: {new Date(existingPost.publishedAt).toLocaleDateString()}</span>
           </div>
 
           <div className="flex items-center gap-2 font-mono">
             {existingPost.updatedAt ? (
               <span className="text-blue-600 dark:text-blue-400 font-semibold flex items-center gap-1">
                 <RefreshCw className="w-3 h-3" />
-                Last Updated: {new Date(existingPost.updatedAt).toLocaleString()}
+                Updated: {new Date(existingPost.updatedAt).toLocaleTimeString()}
               </span>
             ) : (
-              <span className="text-zinc-400">
-                No revisions yet (Original publication)
-              </span>
+              <span className="text-zinc-400">Original Publication</span>
             )}
           </div>
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Main Editor Body (8 Cols) */}
+        {/* Main Content Area (8 Cols) */}
         <div className="lg:col-span-8 space-y-6">
-          
-          {/* Title & Slug */}
-          <div className="p-6 bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-zinc-800 space-y-4">
+          {/* Article Title, Slug & Lead Excerpt */}
+          <div className="p-6 bg-white dark:bg-[#0d1117] border border-zinc-200 dark:border-zinc-800 rounded-xl space-y-4 shadow-xs">
             <div>
               <label className="block text-[11px] font-black uppercase tracking-wider text-zinc-500 mb-1.5">
-                Article Title
+                Article Title / Main Headline
               </label>
               <input
                 type="text"
-                placeholder="e.g. Demystifying Advanced RAG: Hybrid Search, Reranking, and Graph..."
+                placeholder="e.g. Master Python Decorators: From Basics to Advanced Metaprogramming"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-4 py-3 text-base sm:text-lg font-black uppercase tracking-tight border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white outline-none focus:border-black dark:focus:border-white"
+                className="w-full px-4 py-3 text-lg sm:text-xl font-black tracking-tight border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white rounded-lg outline-none focus:border-blue-500 transition-all"
               />
             </div>
 
-            <div className="flex items-center gap-2">
-              <div className="flex-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
                 <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-1">
                   URL Slug (/blog/[slug])
                 </label>
                 <input
                   type="text"
-                  placeholder="advanced-rag-hybrid-search"
+                  placeholder="master-python-decorators"
                   value={slug}
                   onChange={(e) => setSlug(e.target.value)}
-                  className="w-full px-3 py-2 text-xs font-mono border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white outline-none focus:border-black dark:focus:border-white"
+                  className="w-full px-3 py-2 text-xs font-mono border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white rounded-lg outline-none focus:border-blue-500"
                 />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-1">
+                  Category
+                </label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white rounded-lg outline-none"
+                >
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.slug}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
             <div>
               <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-1">
-                Article Summary & Lead Description
+                Article Excerpt & Summary
               </label>
               <textarea
                 rows={2}
-                placeholder="High-level takeaway and technical overview for article card previews..."
+                placeholder="Brief 1-2 sentence overview shown in article card listings..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white outline-none focus:border-black dark:focus:border-white resize-none"
+                className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white rounded-lg outline-none focus:border-blue-500 resize-none"
               />
             </div>
           </div>
 
-          {/* Markdown Content Editor Container */}
-          <div className="bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-zinc-800 overflow-hidden">
-            
-            {/* Editor Toolbar */}
-            <div className="p-3 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 flex flex-wrap items-center justify-between gap-2">
-              
-              {/* Quick Formatting Tools */}
-              <div className="flex flex-wrap items-center gap-1">
-                
-                {/* Heading Menu Dropdown & Quick Buttons */}
-                <div className="relative flex items-center bg-zinc-200/80 dark:bg-zinc-800 rounded p-0.5" ref={headingDropdownRef}>
-                  {/* Dropdown toggle button */}
-                  <button
-                    type="button"
-                    onClick={() => setHeadingMenuOpen(!headingMenuOpen)}
-                    className="flex items-center gap-1 px-2 py-1 text-xs font-bold text-zinc-700 dark:text-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-700 rounded transition-colors"
-                    title="Choose Heading Style"
-                  >
-                    <Heading className="w-3.5 h-3.5" />
-                    <span className="text-[11px] uppercase tracking-wider font-extrabold">Heading</span>
-                    <ChevronDown className={`w-3 h-3 transition-transform ${headingMenuOpen ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  {/* Direct 1-Click Heading Buttons H2 - H5 */}
-                  <div className="flex items-center border-l border-zinc-300 dark:border-zinc-700 ml-1 pl-1 gap-0.5">
-                    <button
-                      type="button"
-                      onClick={() => applyHeading(2)}
-                      className="px-1.5 py-0.5 text-[11px] font-black uppercase rounded hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors text-zinc-700 dark:text-zinc-300"
-                      title="Heading 2 (Section Title - ##)"
-                    >
-                      H2
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => applyHeading(3)}
-                      className="px-1.5 py-0.5 text-[11px] font-black uppercase rounded hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors text-zinc-700 dark:text-zinc-300"
-                      title="Heading 3 (Subsection - ###)"
-                    >
-                      H3
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => applyHeading(4)}
-                      className="px-1.5 py-0.5 text-[11px] font-black uppercase rounded hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors text-zinc-700 dark:text-zinc-300"
-                      title="Heading 4 (Topic Header - ####)"
-                    >
-                      H4
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => applyHeading(5)}
-                      className="px-1.5 py-0.5 text-[11px] font-black uppercase rounded hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors text-zinc-700 dark:text-zinc-300"
-                      title="Heading 5 (Minor Header - #####)"
-                    >
-                      H5
-                    </button>
-                  </div>
-
-                  {/* Dropdown Menu */}
-                  {headingMenuOpen && (
-                    <div className="absolute left-0 top-full mt-1.5 w-56 bg-white dark:bg-[#121212] border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-xl py-1 z-30 animate-in fade-in slide-in-from-top-1 duration-150">
-                      <div className="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-400 border-b border-zinc-100 dark:border-zinc-800">
-                        Format Line or Selection
-                      </div>
-                      
-                      <button
-                        type="button"
-                        onClick={() => {
-                          applyHeading(2);
-                          setHeadingMenuOpen(false);
-                        }}
-                        className="w-full px-3 py-2 text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center justify-between group transition-colors"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 flex items-center justify-center rounded bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-black text-xs">
-                            H2
-                          </span>
-                          <div>
-                            <div className="text-xs font-bold text-neutral-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                              Heading 2
-                            </div>
-                            <div className="text-[10px] text-zinc-500">Major Section Title (##)</div>
-                          </div>
-                        </div>
-                        <span className="text-[10px] font-mono text-zinc-400">##</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          applyHeading(3);
-                          setHeadingMenuOpen(false);
-                        }}
-                        className="w-full px-3 py-2 text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center justify-between group transition-colors"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 flex items-center justify-center rounded bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 font-black text-xs">
-                            H3
-                          </span>
-                          <div>
-                            <div className="text-xs font-bold text-neutral-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
-                              Heading 3
-                            </div>
-                            <div className="text-[10px] text-zinc-500">Subsection (###)</div>
-                          </div>
-                        </div>
-                        <span className="text-[10px] font-mono text-zinc-400">###</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          applyHeading(4);
-                          setHeadingMenuOpen(false);
-                        }}
-                        className="w-full px-3 py-2 text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center justify-between group transition-colors"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 flex items-center justify-center rounded bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 font-black text-xs">
-                            H4
-                          </span>
-                          <div>
-                            <div className="text-xs font-bold text-neutral-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400">
-                              Heading 4
-                            </div>
-                            <div className="text-[10px] text-zinc-500">Topic Sub-block (####)</div>
-                          </div>
-                        </div>
-                        <span className="text-[10px] font-mono text-zinc-400">####</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          applyHeading(5);
-                          setHeadingMenuOpen(false);
-                        }}
-                        className="w-full px-3 py-2 text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center justify-between group transition-colors"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 flex items-center justify-center rounded bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 font-black text-xs">
-                            H5
-                          </span>
-                          <div>
-                            <div className="text-xs font-bold text-neutral-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400">
-                              Heading 5
-                            </div>
-                            <div className="text-[10px] text-zinc-500">Minor Header / Label (#####)</div>
-                          </div>
-                        </div>
-                        <span className="text-[10px] font-mono text-zinc-400">#####</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Divider */}
-                <div className="h-4 w-px bg-zinc-300 dark:bg-zinc-700 mx-1" />
-
-                <button
-                  type="button"
-                  onClick={() => insertMarkdown('**', '**')}
-                  className="p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-bold text-xs"
-                  title="Bold"
-                >
-                  B
-                </button>
-                <button
-                  type="button"
-                  onClick={() => insertMarkdown('*', '*')}
-                  className="p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 italic text-xs"
-                  title="Italic"
-                >
-                  I
-                </button>
-                <button
-                  type="button"
-                  onClick={() => insertMarkdown('```typescript\n', '\n```')}
-                  className="p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-                  title="Code Block"
-                >
-                  <Code className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => insertMarkdown('> ')}
-                  className="p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-                  title="Quote"
-                >
-                  <Quote className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => insertMarkdown('- ')}
-                  className="p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-                  title="List"
-                >
-                  <List className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => insertMarkdown('| Col 1 | Col 2 |\n| :--- | :--- |\n| Data 1 | Data 2 |\n')}
-                  className="p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-                  title="Table"
-                >
-                  <Table className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => insertMarkdown('[', '](https://example.com)')}
-                  className="p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-                  title="Link"
-                >
-                  <LinkIcon className="w-3.5 h-3.5" />
-                </button>
-
-                {/* Hidden local image picker for body markdown */}
-                <input
-                  ref={markdownImageInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleMarkdownLocalImageUpload}
-                  className="hidden"
-                  id="markdown-local-image-input"
-                />
-
-                {/* Button to insert image directly from device */}
-                <button
-                  type="button"
-                  onClick={() => markdownImageInputRef.current?.click()}
-                  disabled={isInsertingLocalImage}
-                  className="ml-1 px-2 py-1 text-[11px] font-bold uppercase tracking-wider bg-zinc-200 dark:bg-zinc-800 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors flex items-center gap-1"
-                  title="Upload & insert diagram from local device"
-                >
-                  <Upload className="w-3 h-3 text-blue-600" />
-                  <span>{isInsertingLocalImage ? 'Uploading...' : 'Insert Image From Device'}</span>
-                </button>
+          {/* Block-Based Content Editor Container */}
+          <div className="bg-white dark:bg-[#0d1117] border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xs">
+            {/* View Mode Switcher Header */}
+            <div className="p-3 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 rounded-t-xl flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Layers className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span className="text-xs font-black uppercase tracking-wider text-neutral-900 dark:text-white">
+                  Block-Based Content CMS
+                </span>
+                <span className="text-[11px] text-zinc-500 font-mono">
+                  ({blocks.length} {blocks.length === 1 ? 'block' : 'blocks'})
+                </span>
               </div>
 
-              {/* View Mode Switcher */}
-              <div className="flex items-center bg-zinc-200 dark:bg-zinc-800 p-0.5 text-xs font-bold uppercase tracking-wider">
+              {/* View Tabs */}
+              <div className="flex items-center bg-zinc-200/80 dark:bg-zinc-800 p-0.5 rounded-lg text-xs font-bold uppercase tracking-wider">
                 <button
                   type="button"
                   onClick={() => setActiveTab('write')}
-                  className={`px-3 py-1 transition-colors ${
+                  className={`px-3 py-1 rounded-md transition-all flex items-center gap-1.5 ${
                     activeTab === 'write'
-                      ? 'bg-black text-white dark:bg-white dark:text-black'
-                      : 'text-zinc-600 dark:text-zinc-400'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
                   }`}
                 >
-                  <span className="flex items-center gap-1.5">
-                    <Edit3 className="w-3 h-3" /> Write
-                  </span>
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>Editor</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setActiveTab('preview')}
-                  className={`px-3 py-1 transition-colors ${
+                  className={`px-3 py-1 rounded-md transition-all flex items-center gap-1.5 ${
                     activeTab === 'preview'
-                      ? 'bg-black text-white dark:bg-white dark:text-black'
-                      : 'text-zinc-600 dark:text-zinc-400'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
                   }`}
                 >
-                  <span className="flex items-center gap-1.5">
-                    <Eye className="w-3 h-3" /> Preview
-                  </span>
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Live Preview</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setActiveTab('split')}
-                  className={`hidden sm:block px-3 py-1 transition-colors ${
+                  className={`hidden sm:flex px-3 py-1 rounded-md transition-all items-center gap-1.5 ${
                     activeTab === 'split'
-                      ? 'bg-black text-white dark:bg-white dark:text-black'
-                      : 'text-zinc-600 dark:text-zinc-400'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
                   }`}
                 >
-                  Split
+                  <Columns className="w-3.5 h-3.5" />
+                  <span>Split View</span>
                 </button>
               </div>
-
             </div>
 
-            {/* Editor Input / Preview Area */}
-            <div className="p-4">
+            {/* Editor Workspace Views */}
+            <div className="p-4 sm:p-6">
               {activeTab === 'write' && (
-                <textarea
-                  id="editor-textarea"
-                  rows={20}
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="Compose long-form engineering markdown..."
-                  className="w-full p-4 font-mono text-xs sm:text-sm bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-neutral-900 dark:text-neutral-100 outline-none focus:border-black dark:focus:border-white resize-y leading-relaxed"
-                />
+                <BlockBasedEditor blocks={blocks} onChange={setBlocks} />
               )}
 
               {activeTab === 'preview' && (
-                <div className="p-6 bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-zinc-800 min-h-[400px]">
-                  <MarkdownRenderer content={content} />
+                <div className="space-y-6">
+                  {/* Mock Article Header in Preview */}
+                  <div className="border-b border-zinc-200 dark:border-zinc-800 pb-6">
+                    <span className="text-[10px] font-bold uppercase tracking-widest bg-blue-600 text-white px-2.5 py-1 inline-block rounded mb-3">
+                      {currentCategory?.name || category}
+                    </span>
+                    <h1 className="text-2xl sm:text-3xl font-black text-neutral-950 dark:text-white tracking-tight">
+                      {title || 'Untitled Article'}
+                    </h1>
+                    {description && (
+                      <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-300 mt-2">
+                        {description}
+                      </p>
+                    )}
+                    <div className="mt-4 flex items-center gap-4 text-xs text-zinc-400 font-medium">
+                      <span>By {currentAuthor?.name || 'Author'}</span>
+                      <span>•</span>
+                      <span>{stats.readingTime} Min Read</span>
+                      <span>•</span>
+                      <span>{stats.wordCount} Words</span>
+                    </div>
+                  </div>
+
+                  {/* Rendered Blocks */}
+                  <ArticleBlocksRenderer blocks={blocks} />
                 </div>
               )}
 
               {activeTab === 'split' && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <textarea
-                    id="editor-textarea"
-                    rows={20}
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    className="w-full p-4 font-mono text-xs bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-neutral-900 dark:text-neutral-100 outline-none focus:border-black dark:focus:border-white"
-                  />
-                  <div className="p-4 bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-zinc-800 overflow-y-auto max-h-[500px]">
-                    <MarkdownRenderer content={content} />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="overflow-y-auto max-h-[85vh] pr-2">
+                    <BlockBasedEditor blocks={blocks} onChange={setBlocks} />
+                  </div>
+                  <div className="p-6 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-y-auto max-h-[85vh]">
+                    <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400 mb-4 pb-2 border-b border-zinc-200 dark:border-zinc-800">
+                      Live Output Preview
+                    </div>
+                    <ArticleBlocksRenderer blocks={blocks} />
                   </div>
                 </div>
               )}
-
-              {/* Stats Bar */}
-              <div className="mt-3 flex items-center justify-between text-xs text-zinc-400 font-mono">
-                <div>
-                  {wordCount.toLocaleString()} words • ~{calculatedReadingTime} min read
-                </div>
-                <div>Markdown, GFM tables, & Local Device Images enabled</div>
-              </div>
             </div>
           </div>
 
-          {/* Manual Frequently Asked Questions (FAQ) Section */}
-          <div className="p-6 bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-zinc-800 space-y-4">
+          {/* Frequently Asked Questions (FAQ) Section */}
+          <div className="p-6 bg-white dark:bg-[#0d1117] border border-zinc-200 dark:border-zinc-800 rounded-xl space-y-4 shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-100 dark:border-zinc-800">
               <div>
                 <div className="flex items-center gap-2">
@@ -790,19 +470,19 @@ export async function handleRequest(req: Request): Promise<Response> {
                     Frequently Asked Questions (FAQ)
                   </h3>
                   {faqs.length > 0 && (
-                    <span className="px-2 py-0.5 text-[10px] font-mono font-bold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 rounded">
+                    <span className="px-2 py-0.5 text-[10px] font-mono font-bold bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 rounded">
                       {faqs.length} {faqs.length === 1 ? 'item' : 'items'}
                     </span>
                   )}
                 </div>
                 <p className="text-[11px] text-zinc-500 mt-1">
-                  Add custom questions and answers to be displayed on this article and indexed in Google FAQ schema.
+                  Questions and answers indexed in Google FAQ structured data.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={handleAddFaq}
-                className="px-3.5 py-2 text-xs font-bold uppercase tracking-wider bg-black text-white dark:bg-white dark:text-black hover:opacity-90 transition-opacity flex items-center gap-1.5 shrink-0 self-start sm:self-auto"
+                className="px-3.5 py-2 text-xs font-bold uppercase tracking-wider bg-zinc-100 dark:bg-zinc-800 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all flex items-center gap-1.5 rounded-lg shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Question</span>
@@ -810,42 +490,26 @@ export async function handleRequest(req: Request): Promise<Response> {
             </div>
 
             {faqs.length === 0 ? (
-              <div className="py-8 text-center border border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20">
-                <HelpCircle className="w-7 h-7 text-zinc-400 mx-auto mb-2 opacity-60" />
-                <p className="text-xs text-zinc-600 dark:text-zinc-400 font-semibold">No FAQs added for this article yet.</p>
-                <p className="text-[11px] text-zinc-500 mt-0.5">Click below to add a manual FAQ pair.</p>
-                <button
-                  type="button"
-                  onClick={handleAddFaq}
-                  className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-neutral-900 dark:text-white transition-colors"
-                >
-                  <Plus className="w-3 h-3" />
-                  <span>Add First FAQ</span>
-                </button>
+              <div className="py-6 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-lg">
+                <p className="text-xs text-zinc-500">No FAQs added for this article yet.</p>
               </div>
             ) : (
-              <div className="space-y-4 pt-1">
+              <div className="space-y-3">
                 {faqs.map((faqItem, idx) => (
                   <div
                     key={idx}
-                    className="p-4 border border-zinc-200 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-900/40 rounded space-y-3"
+                    className="p-4 border border-zinc-200 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-900/40 rounded-xl space-y-2.5"
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-mono font-bold">
-                          {idx + 1}
-                        </span>
-                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500">
-                          FAQ #{idx + 1}
-                        </span>
-                      </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                        Question #{idx + 1}
+                      </span>
                       <div className="flex items-center gap-1">
                         <button
                           type="button"
                           disabled={idx === 0}
                           onClick={() => handleMoveFaq(idx, 'up')}
-                          className="p-1.5 text-zinc-500 hover:text-black dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded disabled:opacity-30 disabled:cursor-not-allowed"
-                          title="Move Up"
+                          className="p-1 text-zinc-500 hover:text-black dark:hover:text-white disabled:opacity-30"
                         >
                           <ArrowUp className="w-3.5 h-3.5" />
                         </button>
@@ -853,47 +517,35 @@ export async function handleRequest(req: Request): Promise<Response> {
                           type="button"
                           disabled={idx === faqs.length - 1}
                           onClick={() => handleMoveFaq(idx, 'down')}
-                          className="p-1.5 text-zinc-500 hover:text-black dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded disabled:opacity-30 disabled:cursor-not-allowed"
-                          title="Move Down"
+                          className="p-1 text-zinc-500 hover:text-black dark:hover:text-white disabled:opacity-30"
                         >
                           <ArrowDown className="w-3.5 h-3.5" />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleRemoveFaq(idx)}
-                          className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded ml-1"
-                          title="Delete FAQ"
+                          className="p-1 text-rose-500 hover:text-rose-700 ml-1"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
 
-                    <div>
-                      <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                        Question
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. How does this system scale under heavy load?"
-                        value={faqItem.question}
-                        onChange={(e) => handleUpdateFaq(idx, 'question', e.target.value)}
-                        className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-black text-neutral-900 dark:text-white outline-none focus:border-black dark:focus:border-white font-medium"
-                      />
-                    </div>
+                    <input
+                      type="text"
+                      placeholder="e.g. How does this algorithm perform on large datasets?"
+                      value={faqItem.question}
+                      onChange={(e) => handleUpdateFaq(idx, 'question', e.target.value)}
+                      className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-950 text-neutral-900 dark:text-white rounded-lg outline-none focus:border-blue-500"
+                    />
 
-                    <div>
-                      <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                        Answer
-                      </label>
-                      <textarea
-                        rows={3}
-                        placeholder="Provide a clear, detailed answer..."
-                        value={faqItem.answer}
-                        onChange={(e) => handleUpdateFaq(idx, 'answer', e.target.value)}
-                        className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-black text-neutral-900 dark:text-white outline-none focus:border-black dark:focus:border-white resize-y leading-relaxed"
-                      />
-                    </div>
+                    <textarea
+                      rows={2}
+                      placeholder="Detailed, accurate answer..."
+                      value={faqItem.answer}
+                      onChange={(e) => handleUpdateFaq(idx, 'answer', e.target.value)}
+                      className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-950 text-neutral-900 dark:text-white rounded-lg outline-none focus:border-blue-500 resize-none"
+                    />
                   </div>
                 ))}
               </div>
@@ -903,30 +555,11 @@ export async function handleRequest(req: Request): Promise<Response> {
 
         {/* Sidebar Configuration (4 Cols) */}
         <div className="lg:col-span-4 space-y-6">
-          
-          {/* Metadata Card */}
-          <div className="p-6 bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-zinc-800 space-y-4">
+          {/* Publication Meta Card */}
+          <div className="p-6 bg-white dark:bg-[#0d1117] border border-zinc-200 dark:border-zinc-800 rounded-xl space-y-4 shadow-xs">
             <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">
               Publication Settings
             </h3>
-
-            {/* Category */}
-            <div>
-              <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-1">
-                Category
-              </label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white outline-none"
-              >
-                {categories.map((c) => (
-                  <option key={c.id} value={c.slug}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
 
             {/* Author */}
             <div>
@@ -936,7 +569,7 @@ export async function handleRequest(req: Request): Promise<Response> {
               <select
                 value={authorId}
                 onChange={(e) => setAuthorId(e.target.value)}
-                className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white outline-none"
+                className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white rounded-lg outline-none"
               >
                 {authors.map((a) => (
                   <option key={a.id} value={a.id}>
@@ -953,10 +586,10 @@ export async function handleRequest(req: Request): Promise<Response> {
               </label>
               <input
                 type="text"
-                placeholder="RAG, AI, Python, Vector Search"
+                placeholder="Python, Decorators, Web Development"
                 value={tagsInput}
                 onChange={(e) => setTagsInput(e.target.value)}
-                className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white outline-none"
+                className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white rounded-lg outline-none"
               />
             </div>
 
@@ -965,21 +598,21 @@ export async function handleRequest(req: Request): Promise<Response> {
               <div>
                 <div className="text-xs font-black uppercase tracking-wider text-neutral-900 dark:text-white flex items-center gap-1">
                   <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                  Hero Featured Headline
+                  Hero Featured Story
                 </div>
-                <div className="text-[10px] text-zinc-500">Showcase in top slot on home page</div>
+                <div className="text-[10px] text-zinc-500">Display prominently on home page</div>
               </div>
               <input
                 type="checkbox"
                 checked={featured}
                 onChange={(e) => setFeatured(e.target.checked)}
-                className="w-4 h-4 text-black focus:ring-0"
+                className="w-4 h-4 text-blue-600 rounded focus:ring-0 cursor-pointer"
               />
             </div>
           </div>
 
-          {/* Featured Image Selector with Local Device Upload */}
-          <div className="p-6 bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-zinc-800 space-y-4">
+          {/* Featured Cover Image */}
+          <div className="p-6 bg-white dark:bg-[#0d1117] border border-zinc-200 dark:border-zinc-800 rounded-xl space-y-4 shadow-xs">
             <LocalImageUploader
               label="Article Featured Cover Image"
               value={featuredImage}
@@ -1001,7 +634,7 @@ export async function handleRequest(req: Request): Promise<Response> {
                     key={preset.label}
                     type="button"
                     onClick={() => setFeaturedImage(preset.url)}
-                    className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-left truncate transition-colors"
+                    className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-left truncate transition-colors rounded"
                   >
                     {preset.label}
                   </button>
@@ -1010,10 +643,10 @@ export async function handleRequest(req: Request): Promise<Response> {
             </div>
           </div>
 
-          {/* SEO & Social Metadata Drawer */}
-          <div className="p-6 bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-zinc-800 space-y-4">
+          {/* SEO & Social Metadata */}
+          <div className="p-6 bg-white dark:bg-[#0d1117] border border-zinc-200 dark:border-zinc-800 rounded-xl space-y-4 shadow-xs">
             <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">
-              SEO & Social Metadata
+              SEO & Search Enhancements
             </h3>
 
             <div>
@@ -1022,10 +655,10 @@ export async function handleRequest(req: Request): Promise<Response> {
               </label>
               <input
                 type="text"
-                placeholder={title || 'Custom meta title'}
+                placeholder={title || 'Custom meta title tag'}
                 value={seoTitle}
                 onChange={(e) => setSeoTitle(e.target.value)}
-                className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white outline-none"
+                className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white rounded-lg outline-none"
               />
             </div>
 
@@ -1035,23 +668,23 @@ export async function handleRequest(req: Request): Promise<Response> {
               </label>
               <textarea
                 rows={2}
-                placeholder={description || 'Custom search snippet'}
+                placeholder={description || 'Search snippet description'}
                 value={seoDescription}
                 onChange={(e) => setSeoDescription(e.target.value)}
-                className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white outline-none resize-none"
+                className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white rounded-lg outline-none resize-none"
               />
             </div>
 
             <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
               <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-1">
-                Direct Answer / Executive Summary
+                Direct Answer / Quick Summary
               </label>
               <textarea
                 rows={3}
-                placeholder="40-70 word self-contained factual summary for search snippets and article header overview..."
+                placeholder="Self-contained direct answer shown in executive summary box..."
                 value={directAnswer}
                 onChange={(e) => setDirectAnswer(e.target.value)}
-                className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white outline-none resize-none"
+                className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white rounded-lg outline-none resize-none"
               />
             </div>
 
@@ -1061,16 +694,14 @@ export async function handleRequest(req: Request): Promise<Response> {
               </label>
               <textarea
                 rows={3}
-                placeholder="Fact 1: Key architectural takeaway&#10;Fact 2: Performance metric assertion"
+                placeholder="Takeaway 1&#10;Takeaway 2"
                 value={keyTakeawaysInput}
                 onChange={(e) => setKeyTakeawaysInput(e.target.value)}
-                className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white outline-none resize-none font-mono text-[11px]"
+                className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white rounded-lg outline-none resize-none font-mono text-[11px]"
               />
             </div>
           </div>
-
         </div>
-
       </div>
     </AdminLayout>
   );

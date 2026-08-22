@@ -5,6 +5,7 @@ import { SEOHead } from '../components/SEOHead';
 import { TableOfContents } from '../components/TableOfContents';
 import { ReadingProgressBar } from '../components/ReadingProgressBar';
 import { MarkdownRenderer } from '../components/MarkdownRenderer';
+import { ArticleBlocksRenderer } from '../components/ArticleBlocksRenderer';
 import { ShareButtons } from '../components/ShareButtons';
 import { ArticleCard } from '../components/ArticleCard';
 import { NewsletterCTA } from '../components/NewsletterCTA';
@@ -316,7 +317,7 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({ slug }) => {
 
             {/* Render Main Content */}
             <div className="article-body">
-              <MarkdownRenderer content={post.content} />
+              <ArticleBlocksRenderer blocks={post.blocks} content={post.content} />
             </div>
 
             {/* FAQ Accordion Section */}

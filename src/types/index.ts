@@ -33,12 +33,46 @@ export interface PostFAQ {
   answer: string;
 }
 
+export type ArticleBlockType = 'text' | 'image' | 'code' | 'quote';
+
+export interface TextBlock {
+  id: string;
+  type: 'text';
+  content: string; // rich text or markdown with inline bold, italic, underline, lists, links
+}
+
+export interface ImageBlock {
+  id: string;
+  type: 'image';
+  url: string;
+  altText: string;
+  caption?: string;
+  alignment?: 'center' | 'left' | 'right' | 'full';
+}
+
+export interface CodeBlockData {
+  id: string;
+  type: 'code';
+  code: string;
+  language: string; // e.g. 'python', 'javascript', 'typescript', etc.
+}
+
+export interface QuoteBlock {
+  id: string;
+  type: 'quote';
+  quote: string;
+  author?: string;
+}
+
+export type ArticleBlock = TextBlock | ImageBlock | CodeBlockData | QuoteBlock;
+
 export interface Post {
   id: string;
   title: string;
   slug: string;
   description: string;
   content: string;
+  blocks?: ArticleBlock[];
   category: string; // category slug
   tags: string[];
   authorId: string;
