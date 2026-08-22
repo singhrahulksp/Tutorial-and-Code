@@ -71,6 +71,18 @@ export const ArticleBlocksRenderer: React.FC<ArticleBlocksRendererProps> = ({
                         </h3>
                       );
                     },
+                    h4: ({ children }) => {
+                      const text = String(children);
+                      const id = text.toLowerCase().replace(/[^\w]+/g, '-');
+                      return (
+                        <h4
+                          id={id}
+                          className="text-base sm:text-lg font-semibold text-neutral-900 dark:text-white tracking-tight mt-5 mb-2 scroll-mt-24"
+                        >
+                          {children}
+                        </h4>
+                      );
+                    },
                     p: ({ children }) => (
                       <p className="my-4 text-neutral-700 dark:text-neutral-300 leading-relaxed font-normal">
                         {children}

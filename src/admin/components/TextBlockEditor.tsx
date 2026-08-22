@@ -45,6 +45,45 @@ export const TextBlockEditor: React.FC<TextBlockEditorProps> = ({ block, onChang
     });
   };
 
+  const applyHeading = (level: 2 | 3 | 4) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const current = block.content;
+
+    // Find line start and line end around cursor/selection
+    const lastNewLine = current.lastIndexOf('\n', start - 1);
+    const lineStart = lastNewLine === -1 ? 0 : lastNewLine + 1;
+    const nextNewLine = current.indexOf('\n', end);
+    const lineEnd = nextNewLine === -1 ? current.length : nextNewLine;
+
+    const currentLine = current.substring(lineStart, lineEnd);
+    // Strip any existing leading heading hashes
+    const cleanLine = currentLine.replace(/^#+\s*/, '');
+    const prefix = `${'#'.repeat(level)} `;
+    
+    // If the line had content, preserve it; otherwise create placeholder
+    const isPlaceholder = !cleanLine.trim();
+    const headingContent = isPlaceholder ? `Section Heading ${level}` : cleanLine;
+    const newLine = `${prefix}${headingContent}`;
+
+    const newContent = current.substring(0, lineStart) + newLine + current.substring(lineEnd);
+    updateContent(newContent);
+
+    setTimeout(() => {
+      textarea.focus();
+      if (isPlaceholder) {
+        // Select the placeholder text so user can replace immediately by typing
+        textarea.setSelectionRange(lineStart + prefix.length, lineStart + newLine.length);
+      } else {
+        const newCursor = lineStart + newLine.length;
+        textarea.setSelectionRange(newCursor, newCursor);
+      }
+    }, 50);
+  };
+
   const applyFormatting = (prefix: string, suffix: string = '') => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -159,6 +198,39 @@ export const TextBlockEditor: React.FC<TextBlockEditorProps> = ({ block, onChang
       {/* Rich Text Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-2 p-1.5 bg-zinc-100 dark:bg-zinc-800/80 rounded-lg border border-zinc-200 dark:border-zinc-700/80 text-xs">
         <div className="flex flex-wrap items-center gap-1">
+          {/* Headings Controls (H2, H3, H4) */}
+          <div className="flex items-center bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-md p-0.5 shadow-2xs mr-1">
+            <button
+              type="button"
+              onClick={() => applyHeading(2)}
+              className="px-2 py-1 rounded hover:bg-blue-50 dark:hover:bg-blue-950/60 text-zinc-800 dark:text-zinc-200 hover:text-blue-600 dark:hover:text-blue-400 font-black text-[11px] tracking-tight transition-colors"
+              title="Heading 2 (## Section Title)"
+            >
+              H2
+            </button>
+            <div className="h-3 w-px bg-zinc-200 dark:bg-zinc-700 mx-0.5" />
+            <button
+              type="button"
+              onClick={() => applyHeading(3)}
+              className="px-2 py-1 rounded hover:bg-blue-50 dark:hover:bg-blue-950/60 text-zinc-800 dark:text-zinc-200 hover:text-blue-600 dark:hover:text-blue-400 font-bold text-[11px] tracking-tight transition-colors"
+              title="Heading 3 (### Subsection Title)"
+            >
+              H3
+            </button>
+            <div className="h-3 w-px bg-zinc-200 dark:bg-zinc-700 mx-0.5" />
+            <button
+              type="button"
+              onClick={() => applyHeading(4)}
+              className="px-1.5 py-1 rounded hover:bg-blue-50 dark:hover:bg-blue-950/60 text-zinc-600 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 font-semibold text-[11px] tracking-tight transition-colors"
+              title="Heading 4 (#### Sub-item Title)"
+            >
+              H4
+            </button>
+          </div>
+
+          <div className="h-4 w-px bg-zinc-300 dark:bg-zinc-700 mx-0.5" />
+
+          {/* Formatting buttons */}
           <button
             type="button"
             onClick={() => applyFormatting('**', '**')}
@@ -262,8 +334,8 @@ export const TextBlockEditor: React.FC<TextBlockEditorProps> = ({ block, onChang
             value={block.content}
             onChange={(e) => updateContent(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Write normal article text, explanations, descriptions, and insights here... (Supports bold, italic, lists, and inline links)"
-            className="w-full p-4 text-sm sm:text-base leading-relaxed bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-neutral-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none"
+            placeholder="Write normal article text, headings (H2, H3, H4), explanations, and insights here... (Click H2 / H3 / H4 buttons above or type ## for headings)"
+            className="w-full p-4 text-sm sm:text-base leading-relaxed bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-neutral-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none font-sans"
           />
         </div>
       ) : (
@@ -272,6 +344,31 @@ export const TextBlockEditor: React.FC<TextBlockEditorProps> = ({ block, onChang
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
+                h1: ({ children }) => (
+                  <h1 className="text-2xl font-extrabold text-neutral-950 dark:text-white tracking-tight mt-6 mb-3">
+                    {children}
+                  </h1>
+                ),
+                h2: ({ children }) => (
+                  <h2 className="text-xl font-bold text-neutral-900 dark:text-white tracking-tight mt-5 mb-2.5">
+                    {children}
+                  </h2>
+                ),
+                h3: ({ children }) => (
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white tracking-tight mt-4 mb-2">
+                    {children}
+                  </h3>
+                ),
+                h4: ({ children }) => (
+                  <h4 className="text-base font-semibold text-neutral-900 dark:text-white tracking-tight mt-3 mb-1.5">
+                    {children}
+                  </h4>
+                ),
+                p: ({ children }) => (
+                  <p className="my-2.5 text-neutral-700 dark:text-neutral-300 leading-relaxed font-normal">
+                    {children}
+                  </p>
+                ),
                 a: ({ href, children }) => (
                   <a
                     href={href}
