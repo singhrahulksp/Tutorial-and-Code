@@ -263,21 +263,6 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({ slug }) => {
             )}
           </div>
         </div>
-
-        {/* Updated Notice Callout Banner */}
-        {formattedUpdatedDate && (
-          <div className="mt-4 px-4 py-2.5 bg-blue-50/50 dark:bg-blue-950/20 border-l-2 border-blue-600 dark:border-blue-500 flex items-center justify-between text-xs text-zinc-600 dark:text-zinc-300">
-            <div className="flex items-center gap-2">
-              <RefreshCw className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
-              <span>
-                <strong className="text-neutral-900 dark:text-white">Editorial Update:</strong> This guide was last revised on <strong>{formattedUpdatedDate}</strong> with updated architectures &amp; code examples.
-              </span>
-            </div>
-            <span className="hidden sm:inline-block text-[10px] font-mono text-zinc-400">
-              Published: {formattedPublishedDate}
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Featured Cover Image with Descriptive Alt Tag */}
