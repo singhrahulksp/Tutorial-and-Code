@@ -13,7 +13,7 @@ export const SitemapPage: React.FC = () => {
         pagePath="/sitemap.xml"
         title="Dynamic XML Sitemap & Index | Tutorials and Code"
         description="Search engine and crawler XML index of all published articles, category tracks, and author profiles crawled dynamically from Firestore."
-        canonicalUrl="https://tutorialsandcode.dev/sitemap.xml"
+        canonicalUrl="https://www.tutorialsandcode.in/sitemap.xml"
       />
 
       <DynamicSitemapGenerator initialFormat={isXmlRoute ? 'xml' : 'visual'} />

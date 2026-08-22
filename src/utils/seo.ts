@@ -10,7 +10,7 @@ export function getSiteUrl(configuredSiteUrl?: string): string {
     // In live environments, use the active domain if valid
     return configuredSiteUrl?.trim() || envSiteUrl || window.location.origin;
   }
-  return configuredSiteUrl?.trim() || envSiteUrl || 'https://tutorialsandcode.dev';
+  return configuredSiteUrl?.trim() || envSiteUrl || 'https://www.tutorialsandcode.in';
 }
 
 /**
@@ -81,18 +81,9 @@ export function generateArticleSchema(
     isAccessibleForFree: 'True',
   };
 
-  // Attach direct answer / abstract for AI citability and featured extractors
+  // Attach direct answer / abstract for search snippets and featured extractors
   if (post.directAnswer) {
     schema.abstract = post.directAnswer;
-  }
-
-  // Attach citations if available
-  if (post.sources && post.sources.length > 0) {
-    schema.citation = post.sources.map((s) => ({
-      '@type': 'CreativeWork',
-      name: s.title,
-      url: s.url,
-    }));
   }
 
   return schema;

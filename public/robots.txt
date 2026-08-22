@@ -1,5 +1,5 @@
 # Tutorials and Code Search & AI Crawler Directives
-# https://tutorialsandcode.dev/robots.txt
+# https://www.tutorialsandcode.in/robots.txt
 
 User-agent: *
 Allow: /
@@ -44,4 +44,4 @@ Allow: /
 Disallow: /admin/
 
 # Dynamic & Static Sitemap Locations
-Sitemap: https://tutorialsandcode.dev/sitemap.xml
+Sitemap: https://www.tutorialsandcode.in/sitemap.xml

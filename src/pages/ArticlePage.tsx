@@ -24,8 +24,6 @@ import {
   Share2,
   RefreshCw,
   Eye,
-  ExternalLink,
-  BookOpen,
   CheckCircle2,
   HelpCircle,
   Link2,
@@ -371,49 +369,6 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({ slug }) => {
                     );
                   })}
                 </div>
-              </section>
-            )}
-
-            {/* Sources & Citations Section */}
-            {post.sources && post.sources.length > 0 && (
-              <section id="sources" className="pt-8 border-t border-zinc-100 dark:border-zinc-800">
-                <div className="flex items-center gap-2 mb-4">
-                  <BookOpen className="w-4 h-4 text-zinc-400" />
-                  <h2 className="text-sm font-black uppercase tracking-[0.2em] text-neutral-900 dark:text-white">
-                    Sources, Citations & Research
-                  </h2>
-                </div>
-                <ul className="space-y-3">
-                  {post.sources.map((source, idx) => (
-                    <li
-                      key={idx}
-                      className="p-3 bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-200 dark:border-zinc-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
-                    >
-                      <div className="min-w-0">
-                        <h3 className="font-bold text-neutral-900 dark:text-white truncate text-xs">
-                          {source.title}
-                        </h3>
-                        <div className="text-[10px] text-zinc-500 font-medium flex items-center gap-2 mt-0.5">
-                          <span>{source.name}</span>
-                          {source.date && (
-                            <>
-                              <span>•</span>
-                              <span>Published {source.date}</span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                      <a
-                        href={source.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline shrink-0"
-                      >
-                        Visit Primary Source <ExternalLink className="w-3 h-3" />
-                      </a>
-                    </li>
-                  ))}
-                </ul>
               </section>
             )}
 

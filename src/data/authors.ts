@@ -10,7 +10,7 @@ export const INITIAL_AUTHORS: Author[] = [
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
     twitter: 'https://twitter.com/elenavance_ai',
     github: 'https://github.com/elenavance',
-    website: 'https://tutorialsandcode.dev/author/elena-vance',
+    website: 'https://www.tutorialsandcode.in/author/elena-vance',
     expertise: ['Retrieval-Augmented Generation (RAG)', 'Transformer Architectures', 'Vector Search & GraphRAG', 'Agentic Reasoning'],
   },
   {
@@ -22,7 +22,7 @@ export const INITIAL_AUTHORS: Author[] = [
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
     twitter: 'https://twitter.com/marcusthorne_ops',
     github: 'https://github.com/marcusthorne',
-    website: 'https://tutorialsandcode.dev/author/marcus-thorne',
+    website: 'https://www.tutorialsandcode.in/author/marcus-thorne',
     expertise: ['Rust Systems Programming', 'Distributed Workflows & Sagas', 'Kubernetes Reliability', 'Low-Latency Networking'],
   },
   {
@@ -34,7 +34,7 @@ export const INITIAL_AUTHORS: Author[] = [
     avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
     twitter: 'https://twitter.com/ariachen_sec',
     github: 'https://github.com/ariachen',
-    website: 'https://tutorialsandcode.dev/author/aria-chen',
+    website: 'https://www.tutorialsandcode.in/author/aria-chen',
     expertise: ['Zero-Trust Architecture', 'SPIFFE / SPIRE Workload Identity', 'Mutual TLS (mTLS)', 'Cloud Security Posture'],
   },
   {
@@ -46,7 +46,7 @@ export const INITIAL_AUTHORS: Author[] = [
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
     twitter: 'https://twitter.com/juliansterling',
     github: 'https://github.com/juliansterling',
-    website: 'https://tutorialsandcode.dev/author/julian-sterling',
+    website: 'https://www.tutorialsandcode.in/author/julian-sterling',
     expertise: ['Frontend Architecture', 'Core Web Vitals & Hydration', 'Open Source Governance', 'Developer Tooling'],
   },
 ];

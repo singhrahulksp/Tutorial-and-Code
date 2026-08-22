@@ -19,7 +19,7 @@ export const INITIAL_POSTS: Post[] = [
     views: 14820,
     seoTitle: 'What is RAG in AI? Advanced Retrieval, Hybrid Search & Reranking',
     seoDescription: 'Retrieval-Augmented Generation (RAG) combines external knowledge retrieval with large language models. Learn how hybrid search, BM25, and cross-encoders optimize precision.',
-    canonicalUrl: 'https://techpulse.dev/blog/what-is-rag-in-ai-advanced-retrieval',
+    canonicalUrl: 'https://www.tutorialsandcode.in/blog/what-is-rag-in-ai-advanced-retrieval',
     directAnswer: 'Retrieval-Augmented Generation (RAG) is an artificial intelligence architecture that retrieves relevant factual documents from an external knowledge base and provides them as grounding context to a Large Language Model (LLM) before generating a response. Modern production RAG uses hybrid search (combining BM25 lexical indexing with dense vector embeddings) and cross-encoder reranking to minimize hallucinations.',
     keyTakeaways: [
       'RAG reduces LLM hallucinations by dynamically injecting verified context into prompt windows.',
@@ -161,7 +161,7 @@ By moving to a three-tier RAG architecture (Hybrid Retrieval -> Cross-Encoder Re
     views: 11200,
     seoTitle: 'Why Rust is the Standard for Cloud Backends: Benchmarks & Architecture',
     seoDescription: 'Rust eliminates garbage collection pauses and memory leaks using compile-time ownership. Discover how Tokio and Axum deliver predictable sub-millisecond p99 latencies.',
-    canonicalUrl: 'https://techpulse.dev/blog/why-rust-is-standard-for-cloud-backends',
+    canonicalUrl: 'https://www.tutorialsandcode.in/blog/why-rust-is-standard-for-cloud-backends',
     directAnswer: 'Rust is becoming the standard for high-throughput cloud backends because it provides memory safety and zero data races at compile time without a garbage collector. By managing memory through compile-time ownership and Resource Acquisition Is Initialization (RAII), Rust services deliver predictable p99 latency and use up to 80% less memory than Java or Go equivalents under heavy concurrent loads.',
     keyTakeaways: [
       'Rust achieves memory safety without a runtime garbage collector via its borrow checker.',
@@ -314,7 +314,7 @@ Rust is no longer just a systems language for kernels and game engines; it is th
     views: 8930,
     seoTitle: 'Zero-Trust Architecture: Workload Identity & Cryptographic Defense',
     seoDescription: 'Zero-Trust Architecture (ZTA) eliminates network perimeter trust by enforcing continuous cryptographic verification with SPIFFE/SPIRE and mTLS.',
-    canonicalUrl: 'https://techpulse.dev/blog/zero-trust-architecture-identity-beyond-perimeter',
+    canonicalUrl: 'https://www.tutorialsandcode.in/blog/zero-trust-architecture-identity-beyond-perimeter',
     directAnswer: 'Zero-Trust Architecture (ZTA) is a cybersecurity model based on the principle of "never trust, always verify." Rather than assuming devices inside a corporate network or virtual private cloud are safe, Zero-Trust requires continuous authentication, least-privilege authorization, and cryptographic attestation (such as mutual TLS and SPIFFE/SPIRE workload identities) for every request.',
     keyTakeaways: [
       'The traditional "castle-and-moat" network perimeter is ineffective in modern hybrid multi-cloud environments.',
@@ -454,7 +454,7 @@ Zero-Trust is not a vendor product you purchase; it is an architectural commitme
     views: 7450,
     seoTitle: 'Optimizing Core Web Vitals with Islands Architecture & Partial Hydration',
     seoDescription: 'Learn how Islands Architecture reduces JavaScript payload sizes and improves Interaction to Next Paint (INP) and Largest Contentful Paint (LCP).',
-    canonicalUrl: 'https://techpulse.dev/blog/next-gen-web-performance-islands-architecture',
+    canonicalUrl: 'https://www.tutorialsandcode.in/blog/next-gen-web-performance-islands-architecture',
     directAnswer: 'Islands Architecture is a web development paradigm where HTML is rendered primarily as static content on the server, with isolated interactive components ("islands") hydrated independently on the client. This dramatically reduces JavaScript execution time and optimizes Google Core Web Vitals, specifically Interaction to Next Paint (INP) and Largest Contentful Paint (LCP).',
     keyTakeaways: [
       'Monolithic Single Page Applications often block mobile CPU threads during full-tree hydration.',
@@ -549,7 +549,7 @@ By moving from client-heavy monolithic apps to fine-grained server-rendered comp
     views: 6320,
     seoTitle: 'Distributed Resilient Workflows: Temporal & Sagas in Microservices',
     seoDescription: 'Durable execution engines like Temporal guarantee multi-step workflow completion despite server crashes and network partitions.',
-    canonicalUrl: 'https://techpulse.dev/blog/distributed-workflows-temporal-event-driven',
+    canonicalUrl: 'https://www.tutorialsandcode.in/blog/distributed-workflows-temporal-event-driven',
     directAnswer: 'Durable execution is an architectural paradigm where distributed workflows are written as standard synchronous code, but their execution state is automatically persisted across process restarts, network outages, and server crashes. Temporal uses event-sourcing and the Saga pattern to execute multi-step business transactions with guaranteed reliability and automated compensating actions.',
     keyTakeaways: [
       'Two-Phase Commit (2PC) creates brittle database locks across microservices; Sagas provide an asynchronous alternative.',
@@ -644,7 +644,7 @@ export async function OrderFulfillmentWorkflow(orderId: string, amount: number):
     views: 5240,
     seoTitle: 'AI Hardware Landscape: Custom Silicon, Blackwell & On-Device NPUs',
     seoDescription: 'Explore how custom ASICs and on-device NPUs are shifting AI compute economics from cloud training to low-power edge inference.',
-    canonicalUrl: 'https://techpulse.dev/blog/ai-hardware-race-custom-silicon-edge-inference',
+    canonicalUrl: 'https://www.tutorialsandcode.in/blog/ai-hardware-race-custom-silicon-edge-inference',
     directAnswer: 'The AI hardware landscape is shifting from general-purpose GPUs toward specialized Application-Specific Integrated Circuits (ASICs) and Neural Processing Units (NPUs). As inference now accounts for over 85% of total enterprise compute costs, custom silicon optimized for low-precision matrix arithmetic (INT4 and FP8) provides superior energy efficiency and cost reduction.',
     keyTakeaways: [
       'Inference compute costs now outweigh foundational model training capital expenditures.',
@@ -698,7 +698,7 @@ This shifts bandwidth and data-privacy dynamics fundamentally in favor of privac
     views: 9410,
     seoTitle: 'Cloud Repatriation for Tech Startups: Financial Realities & Architecture',
     seoDescription: 'Discover when cloud hosting becomes uneconomical and how bare-metal colocation saves mature startups over $1M annually.',
-    canonicalUrl: 'https://techpulse.dev/blog/post-cloud-dilemma-startup-bare-metal-repatriation',
+    canonicalUrl: 'https://www.tutorialsandcode.in/blog/post-cloud-dilemma-startup-bare-metal-repatriation',
     directAnswer: 'Cloud repatriation is the process of moving predictable compute and database workloads from public cloud hyper-scalers (AWS, Azure, GCP) back to dedicated bare-metal servers or colocation facilities. For startups with steady traffic, repatriation can reduce infrastructure expenses by 60% to 80% while modern GitOps tools maintain declarative operational ergonomics.',
     keyTakeaways: [
       'Public clouds offer maximum velocity during early-stage prototyping, but impose severe egress and storage markups at scale.',

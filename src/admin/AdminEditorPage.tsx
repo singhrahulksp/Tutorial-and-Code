@@ -5,6 +5,7 @@ import { AdminLayout } from './AdminLayout';
 import { MarkdownRenderer } from '../components/MarkdownRenderer';
 import { LocalImageUploader } from '../components/LocalImageUploader';
 import { processLocalImageFile } from '../utils/imageUtils';
+import { PostFAQ } from '../types';
 import {
   Save,
   Send,
@@ -27,6 +28,11 @@ import {
   Upload,
   ChevronDown,
   Type,
+  HelpCircle,
+  Plus,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react';
 
 const PRESET_IMAGES = [
@@ -58,6 +64,7 @@ export const AdminEditorPage: React.FC = () => {
   const [seoDescription, setSeoDescription] = useState('');
   const [directAnswer, setDirectAnswer] = useState('');
   const [keyTakeawaysInput, setKeyTakeawaysInput] = useState('');
+  const [faqs, setFaqs] = useState<PostFAQ[]>([]);
   const [activeTab, setActiveTab] = useState<'write' | 'preview' | 'split'>('write');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isInsertingLocalImage, setIsInsertingLocalImage] = useState(false);
@@ -95,7 +102,9 @@ export const AdminEditorPage: React.FC = () => {
       setSeoDescription(existingPost.seoDescription || '');
       setDirectAnswer(existingPost.directAnswer || '');
       setKeyTakeawaysInput(Array.isArray(existingPost.keyTakeaways) ? existingPost.keyTakeaways.join('\n') : '');
+      setFaqs(Array.isArray(existingPost.faq) ? existingPost.faq : []);
     } else {
+      setFaqs([]);
       // Default template for new post
       setContent(`### Executive Summary
 
@@ -246,6 +255,35 @@ export async function handleRequest(req: Request): Promise<Response> {
     }
   };
 
+  // Manual FAQ Management Handlers
+  const handleAddFaq = () => {
+    setFaqs((prev) => [...prev, { question: '', answer: '' }]);
+  };
+
+  const handleUpdateFaq = (index: number, field: 'question' | 'answer', value: string) => {
+    setFaqs((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  };
+
+  const handleRemoveFaq = (index: number) => {
+    setFaqs((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleMoveFaq = (index: number, direction: 'up' | 'down') => {
+    setFaqs((prev) => {
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= prev.length) return prev;
+      const next = [...prev];
+      const temp = next[index];
+      next[index] = next[targetIndex];
+      next[targetIndex] = temp;
+      return next;
+    });
+  };
+
   const handleSave = async (targetStatus: 'draft' | 'published') => {
     if (!title.trim() || !content.trim()) {
       alert('Please provide both an Article Title and Content.');
@@ -261,6 +299,10 @@ export async function handleRequest(req: Request): Promise<Response> {
       .split('\n')
       .map((t) => t.trim().replace(/^[-*•]\s*/, ''))
       .filter(Boolean);
+
+    const cleanedFaqs = faqs
+      .map((f) => ({ question: f.question.trim(), answer: f.answer.trim() }))
+      .filter((f) => f.question.length > 0 && f.answer.length > 0);
 
     const postPayload = {
       title,
@@ -279,6 +321,7 @@ export async function handleRequest(req: Request): Promise<Response> {
       seoDescription: seoDescription.trim() || description,
       directAnswer: directAnswer.trim() || undefined,
       keyTakeaways: keyTakeawaysArray.length > 0 ? keyTakeawaysArray : undefined,
+      faq: cleanedFaqs.length > 0 ? cleanedFaqs : undefined,
       ogImage: featuredImage,
     };
 
@@ -706,6 +749,126 @@ export async function handleRequest(req: Request): Promise<Response> {
               </div>
             </div>
           </div>
+
+          {/* Manual Frequently Asked Questions (FAQ) Section */}
+          <div className="p-6 bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-zinc-800 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-100 dark:border-zinc-800">
+              <div>
+                <div className="flex items-center gap-2">
+                  <HelpCircle className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-neutral-900 dark:text-white">
+                    Frequently Asked Questions (FAQ)
+                  </h3>
+                  {faqs.length > 0 && (
+                    <span className="px-2 py-0.5 text-[10px] font-mono font-bold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 rounded">
+                      {faqs.length} {faqs.length === 1 ? 'item' : 'items'}
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-zinc-500 mt-1">
+                  Add custom questions and answers to be displayed on this article and indexed in Google FAQ schema.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleAddFaq}
+                className="px-3.5 py-2 text-xs font-bold uppercase tracking-wider bg-black text-white dark:bg-white dark:text-black hover:opacity-90 transition-opacity flex items-center gap-1.5 shrink-0 self-start sm:self-auto"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Question</span>
+              </button>
+            </div>
+
+            {faqs.length === 0 ? (
+              <div className="py-8 text-center border border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20">
+                <HelpCircle className="w-7 h-7 text-zinc-400 mx-auto mb-2 opacity-60" />
+                <p className="text-xs text-zinc-600 dark:text-zinc-400 font-semibold">No FAQs added for this article yet.</p>
+                <p className="text-[11px] text-zinc-500 mt-0.5">Click below to add a manual FAQ pair.</p>
+                <button
+                  type="button"
+                  onClick={handleAddFaq}
+                  className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-neutral-900 dark:text-white transition-colors"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>Add First FAQ</span>
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4 pt-1">
+                {faqs.map((faqItem, idx) => (
+                  <div
+                    key={idx}
+                    className="p-4 border border-zinc-200 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-900/40 rounded space-y-3"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-mono font-bold">
+                          {idx + 1}
+                        </span>
+                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500">
+                          FAQ #{idx + 1}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={() => handleMoveFaq(idx, 'up')}
+                          className="p-1.5 text-zinc-500 hover:text-black dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded disabled:opacity-30 disabled:cursor-not-allowed"
+                          title="Move Up"
+                        >
+                          <ArrowUp className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={idx === faqs.length - 1}
+                          onClick={() => handleMoveFaq(idx, 'down')}
+                          className="p-1.5 text-zinc-500 hover:text-black dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded disabled:opacity-30 disabled:cursor-not-allowed"
+                          title="Move Down"
+                        >
+                          <ArrowDown className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveFaq(idx)}
+                          className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded ml-1"
+                          title="Delete FAQ"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                        Question
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. How does this system scale under heavy load?"
+                        value={faqItem.question}
+                        onChange={(e) => handleUpdateFaq(idx, 'question', e.target.value)}
+                        className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-black text-neutral-900 dark:text-white outline-none focus:border-black dark:focus:border-white font-medium"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                        Answer
+                      </label>
+                      <textarea
+                        rows={3}
+                        placeholder="Provide a clear, detailed answer..."
+                        value={faqItem.answer}
+                        onChange={(e) => handleUpdateFaq(idx, 'answer', e.target.value)}
+                        className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-black text-neutral-900 dark:text-white outline-none focus:border-black dark:focus:border-white resize-y leading-relaxed"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Sidebar Configuration (4 Cols) */}
@@ -851,11 +1014,11 @@ export async function handleRequest(req: Request): Promise<Response> {
 
             <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
               <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-1">
-                Direct Answer / Executive Summary (AI Citability)
+                Direct Answer / Executive Summary
               </label>
               <textarea
                 rows={3}
-                placeholder="40-70 word self-contained factual answer for AI extractors and featured snippets..."
+                placeholder="40-70 word self-contained factual summary for search snippets and article header overview..."
                 value={directAnswer}
                 onChange={(e) => setDirectAnswer(e.target.value)}
                 className="w-full px-3 py-2 text-xs border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 text-neutral-900 dark:text-white outline-none resize-none"

@@ -5,31 +5,31 @@
 
   <!-- Core Pages -->
   <url>
-    <loc>https://techpulse.dev/</loc>
+    <loc>https://www.tutorialsandcode.in/</loc>
     <lastmod>2026-08-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://techpulse.dev/latest</loc>
+    <loc>https://www.tutorialsandcode.in/latest</loc>
     <lastmod>2026-08-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://techpulse.dev/about</loc>
+    <loc>https://www.tutorialsandcode.in/about</loc>
     <lastmod>2026-08-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://techpulse.dev/contact</loc>
+    <loc>https://www.tutorialsandcode.in/contact</loc>
     <lastmod>2026-08-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://techpulse.dev/sitemap</loc>
+    <loc>https://www.tutorialsandcode.in/sitemap</loc>
     <lastmod>2026-08-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -37,37 +37,37 @@
 
   <!-- Topical Category Hubs -->
   <url>
-    <loc>https://techpulse.dev/category/ai</loc>
+    <loc>https://www.tutorialsandcode.in/category/ai</loc>
     <lastmod>2026-08-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://techpulse.dev/category/programming</loc>
+    <loc>https://www.tutorialsandcode.in/category/programming</loc>
     <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://techpulse.dev/category/cybersecurity</loc>
+    <loc>https://www.tutorialsandcode.in/category/cybersecurity</loc>
     <lastmod>2026-08-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://techpulse.dev/category/web-development</loc>
+    <loc>https://www.tutorialsandcode.in/category/web-development</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://techpulse.dev/category/cloud</loc>
+    <loc>https://www.tutorialsandcode.in/category/cloud</loc>
     <lastmod>2026-08-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://techpulse.dev/category/tech-news</loc>
+    <loc>https://www.tutorialsandcode.in/category/tech-news</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.80</priority>
@@ -75,25 +75,25 @@
 
   <!-- Author Research Profiles -->
   <url>
-    <loc>https://techpulse.dev/author/elena-vance</loc>
+    <loc>https://www.tutorialsandcode.in/author/elena-vance</loc>
     <lastmod>2026-08-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://techpulse.dev/author/marcus-thorne</loc>
+    <loc>https://www.tutorialsandcode.in/author/marcus-thorne</loc>
     <lastmod>2026-08-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://techpulse.dev/author/aria-chen</loc>
+    <loc>https://www.tutorialsandcode.in/author/aria-chen</loc>
     <lastmod>2026-08-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://techpulse.dev/author/julian-sterling</loc>
+    <loc>https://www.tutorialsandcode.in/author/julian-sterling</loc>
     <lastmod>2026-08-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -101,37 +101,37 @@
 
   <!-- Published Technical Articles -->
   <url>
-    <loc>https://techpulse.dev/blog/what-is-rag-in-ai-advanced-retrieval</loc>
+    <loc>https://www.tutorialsandcode.in/blog/what-is-rag-in-ai-advanced-retrieval</loc>
     <lastmod>2026-08-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://techpulse.dev/blog/why-rust-is-standard-for-cloud-backends</loc>
+    <loc>https://www.tutorialsandcode.in/blog/why-rust-is-standard-for-cloud-backends</loc>
     <lastmod>2026-08-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.90</priority>
   </url>
   <url>
-    <loc>https://techpulse.dev/blog/zero-trust-architecture-identity-beyond-perimeter</loc>
+    <loc>https://www.tutorialsandcode.in/blog/zero-trust-architecture-identity-beyond-perimeter</loc>
     <lastmod>2026-08-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.90</priority>
   </url>
   <url>
-    <loc>https://techpulse.dev/blog/next-gen-web-performance-islands-architecture</loc>
+    <loc>https://www.tutorialsandcode.in/blog/next-gen-web-performance-islands-architecture</loc>
     <lastmod>2026-08-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.90</priority>
   </url>
   <url>
-    <loc>https://techpulse.dev/blog/distributed-workflows-temporal-event-driven</loc>
+    <loc>https://www.tutorialsandcode.in/blog/distributed-workflows-temporal-event-driven</loc>
     <lastmod>2026-08-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.90</priority>
   </url>
   <url>
-    <loc>https://techpulse.dev/blog/state-of-ai-agents-autonomous-architectures</loc>
+    <loc>https://www.tutorialsandcode.in/blog/state-of-ai-agents-autonomous-architectures</loc>
     <lastmod>2026-08-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.90</priority>
