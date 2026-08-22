@@ -5,14 +5,12 @@ import { Post, Author, Category, SiteSettings, PostFAQ } from '../types';
  * Prioritizes environment variables, configured site settings, or browser location.
  */
 export function getSiteUrl(configuredSiteUrl?: string): string {
-  if (configuredSiteUrl && configuredSiteUrl.trim().length > 0) {
-    return configuredSiteUrl.trim().replace(/\/+$/, '');
-  }
   const envSiteUrl = typeof import.meta !== 'undefined' && (import.meta as any).env ? (import.meta as any).env.VITE_SITE_URL : undefined;
-  if (envSiteUrl && envSiteUrl.trim().length > 0) {
-    return envSiteUrl.trim().replace(/\/+$/, '');
+  if (typeof window !== 'undefined' && window.location?.origin && !window.location.origin.includes('localhost')) {
+    // In live environments, use the active domain if valid
+    return configuredSiteUrl?.trim() || envSiteUrl || window.location.origin;
   }
-  return 'https://www.tutorialsandcode.in';
+  return configuredSiteUrl?.trim() || envSiteUrl || 'https://www.tutorialsandcode.in';
 }
 
 /**

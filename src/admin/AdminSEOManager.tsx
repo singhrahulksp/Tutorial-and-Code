@@ -16,18 +16,10 @@ import {
   Smartphone,
   Monitor,
   Share2,
-  FileCode,
-  Copy,
-  Check,
-  Zap,
-  ShieldCheck,
 } from 'lucide-react';
 
 export const AdminSEOManager: React.FC = () => {
-  const { siteSettings, updateSiteSettings, posts, categories, authors } = useBlog();
-  const [copiedLink, setCopiedLink] = useState<string | null>(null);
-
-  const publishedPostCount = posts.filter((p) => p.status === 'published').length;
+  const { siteSettings, updateSiteSettings } = useBlog();
 
   const [pageConfigs, setPageConfigs] = useState<Record<string, PageMetaConfig>>(
     siteSettings?.pageMetaOverrides || DEFAULT_PAGE_META_OVERRIDES
@@ -567,134 +559,6 @@ export const AdminSEOManager: React.FC = () => {
 
         </div>
 
-      </div>
-
-      {/* Automated Dynamic Sitemap & Robots Crawl Automation Hub */}
-      <div className="mt-8 p-6 bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-zinc-800 rounded-sm">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-zinc-100 dark:border-zinc-800/80">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Automated SEO Sitemap Generator Active
-              </span>
-              <span className="text-[11px] text-zinc-400 font-mono">
-                No manual updates required
-              </span>
-            </div>
-            <h3 className="text-base font-bold text-neutral-900 dark:text-white">
-              Dynamic XML Sitemap (<code className="text-xs font-mono text-blue-600 dark:text-blue-400">/sitemap.xml</code>) &amp; Search Indexing
-            </h3>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-3xl">
-              Whenever a new blog article is published, edited, or deleted in Firestore, the XML sitemap at <code className="font-mono text-zinc-700 dark:text-zinc-300">/sitemap.xml</code> is automatically regenerated with updated <code className="font-mono text-zinc-700 dark:text-zinc-300">&lt;lastmod&gt;</code> timestamps, category hubs, and image metadata.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap">
-            <a
-              href="/sitemap.xml"
-              target="_blank"
-              rel="noreferrer"
-              className="px-3.5 py-2 text-xs font-bold uppercase tracking-wider bg-black text-white dark:bg-white dark:text-black hover:opacity-90 transition-opacity inline-flex items-center gap-1.5"
-            >
-              <FileCode className="w-3.5 h-3.5" />
-              <span>Inspect /sitemap.xml</span>
-              <ExternalLink className="w-3 h-3 ml-0.5" />
-            </a>
-            <a
-              href="/robots.txt"
-              target="_blank"
-              rel="noreferrer"
-              className="px-3.5 py-2 text-xs font-bold uppercase tracking-wider border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors inline-flex items-center gap-1.5"
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>View /robots.txt</span>
-              <ExternalLink className="w-3 h-3 ml-0.5" />
-            </a>
-          </div>
-        </div>
-
-        {/* Sitemap Coverage Breakdown */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
-          <div className="p-3.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800">
-            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
-              Published Articles
-            </span>
-            <span className="text-lg font-black font-mono text-neutral-900 dark:text-white">
-              {publishedPostCount}
-            </span>
-            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block mt-0.5">
-              Auto-syncs on publish
-            </span>
-          </div>
-
-          <div className="p-3.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800">
-            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
-              Category Tracks
-            </span>
-            <span className="text-lg font-black font-mono text-neutral-900 dark:text-white">
-              {categories.length}
-            </span>
-            <span className="text-[10px] text-zinc-400 block mt-0.5">
-              Weekly crawler cadence
-            </span>
-          </div>
-
-          <div className="p-3.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800">
-            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
-              Author Profiles
-            </span>
-            <span className="text-lg font-black font-mono text-neutral-900 dark:text-white">
-              {authors.length}
-            </span>
-            <span className="text-[10px] text-zinc-400 block mt-0.5">
-              E-E-A-T credentials
-            </span>
-          </div>
-
-          <div className="p-3.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800">
-            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
-              Static Core Pages
-            </span>
-            <span className="text-lg font-black font-mono text-neutral-900 dark:text-white">
-              7
-            </span>
-            <span className="text-[10px] text-zinc-400 block mt-0.5">
-              Home, About, Legal, etc.
-            </span>
-          </div>
-        </div>
-
-        {/* Copyable Endpoints Banner */}
-        <div className="mt-6 pt-4 border-t border-zinc-100 dark:border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 font-mono text-zinc-600 dark:text-zinc-400 overflow-x-auto w-full md:w-auto">
-            <span className="text-[11px] font-bold uppercase text-zinc-400">Robots Directive:</span>
-            <code className="px-2 py-1 bg-zinc-100 dark:bg-zinc-850 border border-zinc-200 dark:border-zinc-700 text-[11px] text-blue-600 dark:text-blue-400">
-              Sitemap: https://www.tutorialsandcode.in/sitemap.xml
-            </code>
-          </div>
-
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText('https://www.tutorialsandcode.in/sitemap.xml');
-              setCopiedLink('sitemap');
-              setTimeout(() => setCopiedLink(null), 2500);
-            }}
-            className="px-3 py-1.5 text-xs font-bold border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors inline-flex items-center gap-1.5 shrink-0"
-          >
-            {copiedLink === 'sitemap' ? (
-              <>
-                <Check className="w-3.5 h-3.5 text-emerald-500" />
-                <span>Copied Sitemap URL</span>
-              </>
-            ) : (
-              <>
-                <Copy className="w-3.5 h-3.5" />
-                <span>Copy Sitemap URL</span>
-              </>
-            )}
-          </button>
-        </div>
       </div>
     </div>
   );

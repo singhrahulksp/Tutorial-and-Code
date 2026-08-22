@@ -28,13 +28,13 @@ const firebaseConfig = {
 
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
-// Initialize Firestore with custom databaseId if configured and long-polling support for sandboxed/proxied environments
+// Initialize Firestore with custom databaseId if configured and forced long-polling support for sandboxed/proxied environments
 let firestoreInstance: Firestore;
 try {
   firestoreInstance = initializeFirestore(
     app,
     {
-      experimentalAutoDetectLongPolling: true,
+      experimentalForceLongPolling: true,
       ignoreUndefinedProperties: true,
     },
     firebaseConfigJson.firestoreDatabaseId || undefined
