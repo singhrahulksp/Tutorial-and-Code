@@ -334,7 +334,7 @@ export const TextBlockEditor: React.FC<TextBlockEditorProps> = ({ block, onChang
             value={block.content}
             onChange={(e) => updateContent(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Write normal article text, headings (H2, H3, H4), explanations, and insights here... (Click H2 / H3 / H4 buttons above or type ## for headings)"
+            placeholder="Start writng you article from here"
             className="w-full p-4 text-sm sm:text-base leading-relaxed bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-neutral-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none font-sans"
           />
         </div>
